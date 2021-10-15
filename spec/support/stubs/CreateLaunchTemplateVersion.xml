@@ -1,0 +1,16 @@
+<CreateLaunchTemplateVersionResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/">
+    <requestId>6657423a-2616-461a-9ce5-3c65example</requestId>
+    <launchTemplateVersion>
+        <createTime>2017-10-31T11:56:00.000Z</createTime>
+        <createdBy>arn:aws:iam::123456789012:root</createdBy>
+        <defaultVersion>false</defaultVersion>
+        <launchTemplateData>
+            <imageId>ami-aabbccdd</imageId>
+            <instanceType>t2.micro</instanceType>
+        </launchTemplateData>
+        <launchTemplateId>lt-0a20c965061f6454a</launchTemplateId>
+        <launchTemplateName>MyLaunchTemplate</launchTemplateName>
+        <versionDescription>VersionWithNewAMI</versionDescription>
+        <versionNumber>4</versionNumber>
+    </launchTemplateVersion>
+</CreateLaunchTemplateVersionResponse>

@@ -1,0 +1,11 @@
+<DeleteLaunchTemplateVersionsResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/">
+    <requestId>67fc746a-1b3f-467e-8583-7061cexample</requestId>
+    <unsuccessfullyDeletedLaunchTemplateVersionSet/>
+    <successfullyDeletedLaunchTemplateVersionSet>
+        <item>
+            <launchTemplateId>lt-0a20c965061f64abc</launchTemplateId>
+            <launchTemplateName>MyLaunchTemplate</launchTemplateName>
+            <versionNumber>3</versionNumber>
+        </item>
+    </successfullyDeletedLaunchTemplateVersionSet>
+</DeleteLaunchTemplateVersionsResponse>

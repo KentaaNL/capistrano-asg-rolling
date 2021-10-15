@@ -1,0 +1,8 @@
+<StartInstanceRefreshResponse xmlns="http://autoscaling.amazonaws.com/doc/2011-01-01/">
+  <StartInstanceRefreshResult>
+    <InstanceRefreshId>ccfd3c2f-edb3-470d-af32-52cc57d201ca</InstanceRefreshId>
+  </StartInstanceRefreshResult>
+  <ResponseMetadata>
+    <RequestId>a9bbb1dd-ba59-4753-80a2-c662036187eb</RequestId>
+  </ResponseMetadata>
+</StartInstanceRefreshResponse>

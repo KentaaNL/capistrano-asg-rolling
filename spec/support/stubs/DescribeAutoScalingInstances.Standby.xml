@@ -1,0 +1,18 @@
+<DescribeAutoScalingInstancesResponse xmlns="http://autoscaling.amazonaws.com/doc/2011-01-01/">
+  <DescribeAutoScalingInstancesResult>
+    <AutoScalingInstances>
+      <member>
+        <LaunchConfigurationName>my-lc</LaunchConfigurationName>
+        <LifecycleState>Standby</LifecycleState>
+        <AutoScalingGroupName>my-asg</AutoScalingGroupName>
+        <InstanceId>i-12345678</InstanceId>
+        <HealthStatus>HEALTHY</HealthStatus>
+        <ProtectedFromScaleIn>false</ProtectedFromScaleIn>
+        <AvailabilityZone>us-east-1b</AvailabilityZone>
+      </member>
+    </AutoScalingInstances>
+  </DescribeAutoScalingInstancesResult>
+  <ResponseMetadata>
+    <RequestId>7c6e177f-f082-11e1-ac58-3714bEXAMPLE</RequestId>
+  </ResponseMetadata>
+</DescribeAutoScalingInstancesResponse>

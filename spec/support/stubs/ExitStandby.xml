@@ -1,0 +1,19 @@
+<ExitStandbyResponse xmlns="http://autoscaling.amazonaws.com/doc/2011-01-01/">
+  <ExitStandbyResult>
+    <Activities>
+      <member>
+        <ActivityId>12345678-1234-1234-1234-123456789012</ActivityId>
+        <AutoScalingGroupName>my-asg</AutoScalingGroupName>
+        <Description>Moving EC2 instance out of Standby: i-12345678</Description>
+        <Progress>30</Progress>
+        <Cause>At 2015-06-13T22:43:53Z instance i-5b73d709 was moved out of standby in response to a user request, increasing the capacity from 3 to 4.</Cause>
+        <StartTime>2015-06-13T22:43:53.523Z</StartTime>
+        <Details>{"Availability Zone":"us-east-1a","SubnetID":"subnet-12345678"}</Details>
+        <StatusCode>PreInService</StatusCode>
+      </member>
+    </Activities>
+  </ExitStandbyResult>
+  <ResponseMetadata>
+    <RequestId>7c6e177f-f082-11e1-ac58-3714bEXAMPLE</RequestId>
+  </ResponseMetadata>
+</ExitStandbyResponse>

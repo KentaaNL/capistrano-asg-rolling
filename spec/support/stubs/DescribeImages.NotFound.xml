@@ -1,0 +1,9 @@
+<Response>
+    <Errors>
+         <Error>
+           <Code>InvalidAMIID.NotFound</Code>
+           <Message>The image id '[ami-12345678]' does not exist</Message>
+         </Error>
+    </Errors>
+    <RequestID>ea966190-f9aa-478e-9ede-example</RequestID>
+</Response>
