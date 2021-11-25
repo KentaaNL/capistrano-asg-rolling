@@ -34,6 +34,10 @@ module Capistrano
           fetch(:aws_secret_access_key)
         end
 
+        def aws_session_token
+          fetch(:aws_session_token)
+        end
+
         def aws_region
           fetch(:aws_region)
         end
