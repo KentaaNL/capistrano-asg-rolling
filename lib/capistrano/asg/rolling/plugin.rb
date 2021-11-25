@@ -12,10 +12,6 @@ module Capistrano
       #
       class Plugin < Capistrano::Plugin
         def set_defaults
-          set_if_empty :aws_access_key_id, ENV['AWS_ACCESS_KEY_ID']
-          set_if_empty :aws_secret_access_key, ENV['AWS_SECRET_ACCESS_KEY']
-          set_if_empty :aws_region, ENV['AWS_REGION']
-
           set_if_empty :asg_rolling_group_name, ENV['asg_name']
           set_if_empty :asg_rolling_use_private_ip_address, true
           set_if_empty :asg_rolling_verbose, true

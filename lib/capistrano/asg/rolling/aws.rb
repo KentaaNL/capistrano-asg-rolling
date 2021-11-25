@@ -27,7 +27,7 @@ module Capistrano
         end
 
         def aws_credentials
-          ::Aws::Credentials.new(aws_access_key_id, aws_secret_access_key)
+          ::Aws::Credentials.new(aws_access_key_id, aws_secret_access_key, aws_session_token)
         end
 
         def aws_access_key_id
@@ -36,6 +36,10 @@ module Capistrano
 
         def aws_secret_access_key
           Configuration.aws_secret_access_key
+        end
+
+        def aws_session_token
+          Configuration.aws_session_token
         end
 
         def aws_region
