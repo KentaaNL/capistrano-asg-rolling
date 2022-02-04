@@ -40,8 +40,6 @@ The gem could have a better / fancier name.
 
 Currently all Launch Template versions and AMIs will be deleted, also when not created by this gem.
 
-When an Instance refresh is already in progress, the deployment will fail with an `Aws::AutoScaling::Errors::InstanceRefreshInProgress`.
-
 Documentation is incomplete.
 
 ## Installation
@@ -123,7 +121,7 @@ Now start a deployment with `cap <stage> deploy` and enjoy.
 
 ### Deploy without rolling update
 
-There might be cases where you just want to deploy your code to the servers in the Auto Scaling Group(s) without a rolling update. 
+There might be cases where you just want to deploy your code to the servers in the Auto Scaling Group(s) without a rolling update.
 
 You can configure rolling updates per autoscaling group by using the `rolling` option:
 
