@@ -11,8 +11,8 @@ Instead of deploying to live servers, capistrano-asg-rolling will create a tempo
 - Launch an instance from the AMI defined in the Launch Template of the Auto Scaling Group(s).
 - Deploy your application to the launched instances.
 - After deployment, stop the instances and create an AMI for each instance.
-- Create new Launch Template versions with the new AMIs.
-- Trigger Instance Refresh on the Auto Scaling Group(s) to perform an rolling update.
+- Create new Launch Template versions for the new AMIs.
+- Trigger Instance Refresh on the Auto Scaling Group(s) to perform a rolling update.
 - Delete any outdated Launch Template versions, AMIs and snapshots created by previous deployments.
 - Terminate the no longer needed instances.
 
@@ -26,7 +26,7 @@ Please be aware of the limitations of using instance refresh, in particular "Ins
 
 This gem depends on Auto Scaling Groups with Launch Templates. Using an Auto Scaling Group with a Launch Configuration is not supported, and will raise an `Capistrano::ASG::Rolling::NoLaunchTemplate`.
 
-Make sure you have configured the Auto Scaling Groups with the Launch Template version set to `Latest` so instance refresh will work.
+Instance refresh uses the desired configuration to update the Auto Scaling Group after a succesful deployment. Setting the Launch Template version to `Latest` on the Auto Scaling Group is not necessary.
 
 #### Experimental
 
