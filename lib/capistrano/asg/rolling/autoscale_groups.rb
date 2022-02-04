@@ -28,10 +28,6 @@ module Capistrano
           self.class.new(select { |group| group.launch_template == launch_template })
         end
 
-        def start_instance_refresh(launch_template)
-          each { |group| group.start_instance_refresh(launch_template) }
-        end
-
         private
 
         def filtered?(group)

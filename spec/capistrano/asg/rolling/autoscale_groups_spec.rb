@@ -73,23 +73,4 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroups do
       expect(groups.with_launch_template(template)).to include(group1, group2)
     end
   end
-
-  describe '#start_instance_refresh' do
-    let(:template) { Capistrano::ASG::Rolling::LaunchTemplate.new('lt-1234567890', 1) }
-
-    before do
-      stub_request(:post, /amazonaws.com/)
-        .with(body: /Action=DescribeAutoScalingGroups/).to_return(body: File.read('spec/support/stubs/DescribeAutoScalingGroups.xml'))
-      stub_request(:post, /amazonaws.com/)
-        .with(body: /Action=StartInstanceRefresh/).to_return(body: File.read('spec/support/stubs/StartInstanceRefresh.xml'))
-    end
-
-    it 'starts instance refresh for all auto scaling groups' do
-      groups.start_instance_refresh(template)
-      expect(WebMock).to have_requested(:post, /amazonaws.com/)
-        .with(body: /Action=StartInstanceRefresh&AutoScalingGroupName=asg-web/).once
-      expect(WebMock).to have_requested(:post, /amazonaws.com/)
-        .with(body: /Action=StartInstanceRefresh&AutoScalingGroupName=asg-jobs/).once
-    end
-  end
 end

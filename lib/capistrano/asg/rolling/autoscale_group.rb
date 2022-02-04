@@ -56,6 +56,8 @@ module Capistrano
               skip_matching: true
             }
           )
+        rescue Aws::AutoScaling::Errors::InstanceRefreshInProgress => e
+          raise Capistrano::ASG::Rolling::InstanceRefreshFailed, e
         end
 
         # Returns instances with lifecycle state "InService" for this Auto Scaling Group.

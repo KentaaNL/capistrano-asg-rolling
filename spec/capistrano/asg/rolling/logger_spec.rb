@@ -9,7 +9,7 @@ RSpec.describe Capistrano::ASG::Rolling::Logger do
     end
 
     it 'formats text as bold' do
-      expect { logger.info('hello **world**') }.to output("hello \e[1;97;49mworld\e[0m\n").to_stdout
+      expect { logger.info('hello **world**') }.to output("hello \e[1mworld\e[22m\n").to_stdout
     end
   end
 
@@ -19,7 +19,7 @@ RSpec.describe Capistrano::ASG::Rolling::Logger do
     end
 
     it 'formats text as bold' do
-      expect { logger.error('hello **world**') }.to output("\e[0;31;49mhello \e[1;97;49mworld\e[0m\e[0m\n").to_stderr
+      expect { logger.error('hello **world**') }.to output("\e[0;31;49mhello \e[1mworld\e[22m\e[0m\n").to_stderr
     end
   end
 
@@ -38,7 +38,7 @@ RSpec.describe Capistrano::ASG::Rolling::Logger do
       end
 
       it 'formats text as bold' do
-        expect { logger.verbose('hello **world**') }.to output("hello \e[1;97;49mworld\e[0m\n").to_stdout
+        expect { logger.verbose('hello **world**') }.to output("hello \e[1mworld\e[22m\n").to_stdout
       end
     end
   end

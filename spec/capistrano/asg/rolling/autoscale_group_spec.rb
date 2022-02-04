@@ -36,7 +36,7 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
           .with(body: /Action=DescribeAutoScalingGroups/).to_return(body: File.read('spec/support/stubs/DescribeAutoScalingGroups.NoLaunchTemplate.xml'))
       end
 
-      it 'raises an exception' do
+      it 'raises a NoLaunchTemplate exception' do
         expect { group.launch_template }.to raise_error(Capistrano::ASG::Rolling::NoLaunchTemplate)
       end
     end
@@ -73,6 +73,17 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
       group.start_instance_refresh(template)
       expect(WebMock).to have_requested(:post, /amazonaws.com/)
         .with(body: /Action=StartInstanceRefresh&AutoScalingGroupName=test-asg/).once
+    end
+
+    context 'when instance refresh is already in progress' do
+      before do
+        stub_request(:post, /amazonaws.com/)
+          .with(body: /Action=StartInstanceRefresh&AutoScalingGroupName=test-asg/).to_return(body: File.read('spec/support/stubs/StartInstanceRefresh.InProgress.xml'), status: 400)
+      end
+
+      it 'raises an InstanceRefreshFailed exception' do
+        expect { group.start_instance_refresh(template) }.to raise_error(Capistrano::ASG::Rolling::InstanceRefreshFailed, 'An Instance Refresh is already in progress and blocks the execution of this Instance Refresh.')
+      end
     end
   end
 

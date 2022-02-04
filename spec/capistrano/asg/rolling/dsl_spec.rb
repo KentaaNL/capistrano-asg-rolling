@@ -34,8 +34,8 @@ RSpec.describe Capistrano::ASG::Rolling::DSL do
           .with(body: /Action=DescribeAutoScalingGroups/).to_return(body: File.read('spec/support/stubs/DescribeAutoScalingGroups.Empty.xml'))
       end
 
-      it 'raises an exception' do
-        expect { autoscale 'my-asg' }.to raise_error(Capistrano::ASG::Rolling::NoAutoScalingGroup)
+      it 'raises a NoAutoScalingGroup exception' do
+        expect { autoscale 'my-asg' }.to raise_error(Capistrano::ASG::Rolling::NoAutoScalingGroup, 'Auto Scaling Group my-asg could not be found.')
       end
     end
   end

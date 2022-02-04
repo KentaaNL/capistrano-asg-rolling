@@ -58,7 +58,13 @@ namespace :rolling do
 
       logger.info 'Triggering Instance Refresh on Auto Scaling Group(s)...'
       updated_templates.each do |launch_template|
-        config.autoscale_groups.with_launch_template(launch_template).start_instance_refresh(launch_template)
+        config.autoscale_groups.with_launch_template(launch_template).each do |group|
+          group.start_instance_refresh(launch_template)
+
+          logger.verbose "Successfully started Instance Refresh on Auto Scaling Group **#{group.name}**."
+        rescue Capistrano::ASG::Rolling::InstanceRefreshFailed => e
+          logger.info "Failed to start Instance Refresh on Auto Scaling Group **#{group.name}**: #{e.message}"
+        end
       end
 
       config.launch_templates.merge(updated_templates)

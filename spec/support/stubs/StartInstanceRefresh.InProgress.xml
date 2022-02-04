@@ -1,0 +1,8 @@
+<ErrorResponse xmlns="http://autoscaling.amazonaws.com/doc/2011-01-01/">
+  <Error>
+    <Type>Sender</Type>
+    <Code>InstanceRefreshInProgress</Code>
+    <Message>An Instance Refresh is already in progress and blocks the execution of this Instance Refresh.</Message>
+  </Error>
+  <RequestId>ab45c1a5-1ed4-46ec-92f8-04029d6fc676</RequestId>
+</ErrorResponse>

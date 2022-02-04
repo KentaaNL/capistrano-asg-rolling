@@ -12,6 +12,9 @@ module Capistrano
 
       class NoLaunchTemplate < Capistrano::ASG::Rolling::Exception
       end
+
+      class InstanceRefreshFailed < Capistrano::ASG::Rolling::Exception
+      end
     end
   end
 end
