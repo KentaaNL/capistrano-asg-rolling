@@ -53,14 +53,15 @@ namespace :rolling do
       amis = config.instances.create_ami(description: revision_log_message)
 
       logger.info 'Updating Launch Template(s) with the new AMI(s)...'
-      launch_templates = config.autoscale_groups.update_launch_templates(amis: amis, description: revision_log_message)
+      launch_templates = config.autoscale_groups.launch_templates
+      updated_templates = launch_templates.update(amis: amis, description: revision_log_message)
 
       logger.info 'Triggering Instance Refresh on Auto Scaling Group(s)...'
-      launch_templates.each do |launch_template|
-        config.autoscale_groups.with_launch_template(launch_template).start_instance_refresh
+      updated_templates.each do |launch_template|
+        config.autoscale_groups.with_launch_template(launch_template).start_instance_refresh(launch_template)
       end
 
-      config.launch_templates.merge(launch_templates)
+      config.launch_templates.merge(updated_templates)
     end
   end
 
@@ -75,7 +76,7 @@ namespace :rolling do
           # Need to retrieve AMI before deleting the Launch Template version.
           ami = version.ami
 
-          logger.verbose "Deleting Launch Template version **#{version.version}**..."
+          logger.verbose "Deleting Launch Template **#{version.id}** version **#{version.version}**..."
           version.delete
 
           if ami.exists?

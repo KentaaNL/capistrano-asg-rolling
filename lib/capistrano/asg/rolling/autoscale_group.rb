@@ -40,13 +40,20 @@ module Capistrano
           aws_autoscaling_group.health_check_grace_period
         end
 
-        def start_instance_refresh
+        def start_instance_refresh(launch_template)
           aws_autoscaling_client.start_instance_refresh(
             auto_scaling_group_name: name,
             strategy: 'Rolling',
+            desired_configuration: {
+              launch_template: {
+                launch_template_id: launch_template.id,
+                version: launch_template.version
+              }
+            },
             preferences: {
               instance_warmup: instance_warmup_time,
-              min_healthy_percentage: 100
+              min_healthy_percentage: 100,
+              skip_matching: true
             }
           )
         end

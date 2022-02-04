@@ -62,13 +62,15 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
   end
 
   describe '#start_instance_refresh' do
+    let(:template) { Capistrano::ASG::Rolling::LaunchTemplate.new('lt-1234567890', 1) }
+
     before do
       stub_request(:post, /amazonaws.com/)
         .with(body: /Action=StartInstanceRefresh&AutoScalingGroupName=test-asg/).to_return(body: File.read('spec/support/stubs/StartInstanceRefresh.xml'))
     end
 
     it 'calls the API to start instance refresh for the given auto scale group' do
-      group.start_instance_refresh
+      group.start_instance_refresh(template)
       expect(WebMock).to have_requested(:post, /amazonaws.com/)
         .with(body: /Action=StartInstanceRefresh&AutoScalingGroupName=test-asg/).once
     end

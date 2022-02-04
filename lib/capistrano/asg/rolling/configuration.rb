@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'set'
-
 module Capistrano
   module ASG
     module Rolling
@@ -23,7 +21,7 @@ module Capistrano
 
         # Updated Launch Templates.
         def launch_templates
-          @launch_templates ||= Set.new
+          @launch_templates ||= LaunchTemplates.new
         end
 
         def aws_access_key_id
