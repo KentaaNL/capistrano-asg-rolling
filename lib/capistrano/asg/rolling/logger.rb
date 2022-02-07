@@ -14,7 +14,7 @@ module Capistrano
         end
 
         def error(text)
-          $stderr.puts format_text(text, :red) # rubocop:disable Style/StderrPuts
+          $stderr.puts format_text(text, color: :red) # rubocop:disable Style/StderrPuts
         end
 
         def verbose(text)
@@ -23,21 +23,17 @@ module Capistrano
 
         private
 
-        def format_text(text, color = nil)
-          if color
-            colored_text = colorize(text, color)
-            colored_text.gsub(/\*\*(.+?)\*\*/, bold_text('\\1'))
-          else
-            text.gsub(/\*\*(.+?)\*\*/, bold_text('\\1'))
-          end
+        def format_text(text, color: nil)
+          text = colorize_text(text, color) if color
+          text.gsub(/\*\*(.+?)\*\*/, bold_text('\\1'))
         end
 
         def bold_text(text)
           "\e[1m#{text}\e[22m"
         end
 
-        def colorize(text, color, mode = nil)
-          _color.colorize(text, color, mode)
+        def colorize_text(text, color)
+          _color.colorize(text, color)
         end
 
         def _color
