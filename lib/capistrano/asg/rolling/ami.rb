@@ -25,12 +25,12 @@ module Capistrano
           }
 
           if tags
-            options[:tag_specifications] = tags.flat_map do |key, value|
-              [
-                { resource_type: 'image', tags: [{ key: key, value: value }] },
-                { resource_type: 'snapshot', tags: [{ key: key, value: value }] }
-              ]
-            end
+            tag_specifications = tags.map { |key, value| { key: key, value: value } }
+
+            options[:tag_specifications] = [
+              { resource_type: 'image', tags: tag_specifications },
+              { resource_type: 'snapshot', tags: tag_specifications }
+            ]
           end
 
           response = aws_ec2_client.create_image(options)
@@ -63,6 +63,14 @@ module Capistrano
           @snapshots ||= aws_ec2_image.block_device_mappings.map do |mapping|
             Snapshot.new(mapping.ebs.snapshot_id)
           end
+        end
+
+        def tags
+          @tags ||= aws_ec2_image.tags.map { |tag| [tag.key, tag.value] }.to_h
+        end
+
+        def tag?(key)
+          tags.key?(key)
         end
 
         private

@@ -43,9 +43,9 @@ module Capistrano
           Parallel.run(instances, &:terminate)
         end
 
-        def create_ami(name: nil, description: nil)
+        def create_ami(name: nil, description: nil, tags: nil)
           Parallel.run(instances) do |instance|
-            instance.create_ami(name: name, description: description)
+            instance.create_ami(name: name, description: description, tags: tags)
           end
         end
 

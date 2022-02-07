@@ -46,9 +46,12 @@ module Capistrano
           # Optionally override settings in the Launch Template.
           options.merge!(overrides) if overrides
 
+          resource_tags = [
+            { key: 'Name', value: autoscaling_group.name_tag }
+          ]
           options[:tag_specifications] = [
-            { resource_type: 'instance', tags: [{ key: 'Name', value: autoscaling_group.name_tag }] },
-            { resource_type: 'volume', tags: [{ key: 'Name', value: autoscaling_group.name_tag }] }
+            { resource_type: 'instance', tags: resource_tags },
+            { resource_type: 'volume', tags: resource_tags }
           ]
 
           response = aws_ec2_client.run_instances(options)
@@ -90,11 +93,20 @@ module Capistrano
           @terminated = true
         end
 
-        def create_ami(name: nil, description: nil)
-          now = Time.now
-          name ||= "#{autoscale_group.name_tag} on #{now.strftime('%Y-%m-%d')} at #{now.strftime('%H.%M.%S')}"
+        def create_ami(name: nil, description: nil, tags: nil)
+          ami_tags = {
+            'Name' => autoscale_group.name_tag,
+            'capistrano-asg-rolling:version' => Capistrano::ASG::Rolling::VERSION
+          }
+          ami_tags.merge!(tags) if tags
 
-          AMI.create(instance: self, name: name, description: description, tags: { 'Name' => autoscale_group.name_tag })
+          AMI.create(instance: self, name: name || ami_name, description: description, tags: ami_tags)
+        end
+
+        private
+
+        def ami_name
+          "#{autoscale_group.name_tag} on #{Time.now.strftime('%Y-%m-%d at %H.%M.%S')}"
         end
       end
     end

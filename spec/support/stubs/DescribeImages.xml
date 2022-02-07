@@ -33,6 +33,12 @@
             </blockDeviceMapping>
             <virtualizationType>paravirtual</virtualizationType>
             <hypervisor>xen</hypervisor>
+            <tagSet>
+                <item>
+                    <key>Name</key>
+                    <value>Image_1</value>
+                </item>
+            </tagSet>
         </item>
     </imagesSet>
 </DescribeImagesResponse>

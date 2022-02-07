@@ -20,7 +20,7 @@ RSpec.describe Capistrano::ASG::Rolling::AMI do
     end
 
     it 'calls the API to create tags' do
-      described_class.create(instance: instance, name: 'Test AMI', tags: { 'Name' => 'Test tag' })
+      described_class.create(instance: instance, name: 'Test AMI', tags: { 'Name' => 'Test tag', 'Environment' => 'staging' })
       expect(WebMock).to have_requested(:post, /amazonaws.com/)
         .with(body: /Action=CreateImage&InstanceId=i-12345&Name=Test%20AMI&TagSpecification.1.ResourceType=image&TagSpecification.1.Tag.1.Key=Name&TagSpecification.1.Tag.1.Value=Test%20tag/).once
     end
@@ -99,6 +99,40 @@ RSpec.describe Capistrano::ASG::Rolling::AMI do
     it 'sets the ID on Snapshot' do
       snapshot = ami.snapshots.first
       expect(snapshot.id).to eq('snap-1234567890abcdef0')
+    end
+  end
+
+  describe '#tags' do
+    before do
+      stub_request(:post, /amazonaws.com/)
+        .with(body: /Action=DescribeImages/).to_return(body: File.read('spec/support/stubs/DescribeImages.xml'))
+    end
+
+    it 'calls the API to retrieve the tags' do
+      ami.tags
+      expect(WebMock).to have_requested(:post, /amazonaws.com/)
+        .with(body: /Action=DescribeImages&ImageId.1=ami-12345/).once
+    end
+
+    it 'returns a Hash with the tags' do
+      tags = ami.tags
+      expect(tags).not_to be_empty
+      expect(tags['Name']).to eq('Image_1')
+    end
+  end
+
+  describe '#tag?' do
+    before do
+      stub_request(:post, /amazonaws.com/)
+        .with(body: /Action=DescribeImages/).to_return(body: File.read('spec/support/stubs/DescribeImages.xml'))
+    end
+
+    it 'returns true when a tag exists' do
+      expect(ami.tag?('Name')).to be true
+    end
+
+    it 'returns false when a tag does not exist' do
+      expect(ami.tag?('Unknown')).to be false
     end
   end
 end
