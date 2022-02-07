@@ -62,7 +62,7 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
   end
 
   describe '#start_instance_refresh' do
-    let(:template) { Capistrano::ASG::Rolling::LaunchTemplate.new('lt-1234567890', 1) }
+    let(:template) { Capistrano::ASG::Rolling::LaunchTemplate.new('lt-1234567890', 1, 'MyLaunchTemplate') }
 
     before do
       stub_request(:post, /amazonaws.com/)

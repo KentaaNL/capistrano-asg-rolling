@@ -82,7 +82,7 @@ namespace :rolling do
           # Need to retrieve AMI before deleting the Launch Template version.
           ami = version.ami
 
-          logger.verbose "Deleting Launch Template **#{version.id}** version **#{version.version}**..."
+          logger.verbose "Deleting Launch Template **#{version.name}** version **#{version.version}**..."
           version.delete
 
           if ami.exists?

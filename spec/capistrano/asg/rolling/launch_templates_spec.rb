@@ -3,7 +3,7 @@
 RSpec.describe Capistrano::ASG::Rolling::LaunchTemplates do
   subject(:templates) { described_class.new }
 
-  let(:template1) { Capistrano::ASG::Rolling::LaunchTemplate.new('lt-0a20c965061f64abc', 1) }
+  let(:template1) { Capistrano::ASG::Rolling::LaunchTemplate.new('lt-0a20c965061f64abc', 1, 'MyLaunchTemplate') }
 
   before do
     templates << template1
@@ -11,7 +11,7 @@ RSpec.describe Capistrano::ASG::Rolling::LaunchTemplates do
 
   describe '#<<' do
     it 'adds a launch template to the set' do
-      templates << Capistrano::ASG::Rolling::LaunchTemplate.new('lt-0a20c965061f6454a', 1)
+      templates << Capistrano::ASG::Rolling::LaunchTemplate.new('lt-0a20c965061f6454a', 1, 'MyLaunchTemplate')
       expect(templates.count).to eq(2)
     end
 
@@ -26,7 +26,7 @@ RSpec.describe Capistrano::ASG::Rolling::LaunchTemplates do
 
     before do
       templates2 << template1
-      templates2 << Capistrano::ASG::Rolling::LaunchTemplate.new('lt-0a20c965061f6454a', 1)
+      templates2 << Capistrano::ASG::Rolling::LaunchTemplate.new('lt-0a20c965061f6454a', 1, 'MyLaunchTemplate')
     end
 
     it 'merges the two template sets' do

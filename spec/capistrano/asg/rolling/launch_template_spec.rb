@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Capistrano::ASG::Rolling::LaunchTemplate do
-  subject(:template) { described_class.new('lt-0a20c965061f64abc', 1) }
+  subject(:template) { described_class.new('lt-0a20c965061f64abc', 1, 'MyLaunchTemplate') }
 
   before do
     stub_request(:post, /amazonaws.com/)
@@ -64,7 +64,7 @@ RSpec.describe Capistrano::ASG::Rolling::LaunchTemplate do
     end
 
     context 'when this is the third version' do
-      subject(:template) { described_class.new('lt-0a20c965061f64abc', 3) }
+      subject(:template) { described_class.new('lt-0a20c965061f64abc', 3, 'MyLaunchTemplate') }
 
       before do
         stub_request(:post, /amazonaws.com/)
@@ -104,8 +104,8 @@ RSpec.describe Capistrano::ASG::Rolling::LaunchTemplate do
   end
 
   describe 'object equality' do
-    let(:template2) { described_class.new('lt-0a20c965061f64abc', 1) }
-    let(:template3) { described_class.new('lt-0a20c965061f64def', 1) }
+    let(:template2) { described_class.new('lt-0a20c965061f64abc', 1, 'MyLaunchTemplate') }
+    let(:template3) { described_class.new('lt-0a20c965061f64def', 1, 'MyLaunchTemplate') }
 
     it 'is equal for two templates with same ID' do
       expect(template).to eql(template2)

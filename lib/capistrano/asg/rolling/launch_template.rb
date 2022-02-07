@@ -7,12 +7,13 @@ module Capistrano
       class LaunchTemplate
         include AWS
 
-        attr_reader :id, :version, :default_version
+        attr_reader :id, :version, :name, :default_version
         alias default_version? default_version
 
-        def initialize(id, version, default_version: false)
+        def initialize(id, version, name, default_version: false)
           @id = id
           @version = version.to_s
+          @name = name
           @default_version = default_version
         end
 
@@ -25,7 +26,7 @@ module Capistrano
           )
           version = response.launch_template_version
 
-          self.class.new(version.launch_template_id, version.version_number, default_version: version.default_version)
+          self.class.new(version.launch_template_id, version.version_number, version.launch_template_name, default_version: version.default_version)
         end
 
         def delete
@@ -44,7 +45,7 @@ module Capistrano
                         .launch_template_versions
                         .sort_by { |v| -v.version_number }
                         .select { |v| v.version_number < version_number }
-                        .map { |v| self.class.new(v.launch_template_id, v.version_number, default_version: v.default_version) }
+                        .map { |v| self.class.new(v.launch_template_id, v.version_number, v.launch_template_name, default_version: v.default_version) }
         end
 
         def version_number

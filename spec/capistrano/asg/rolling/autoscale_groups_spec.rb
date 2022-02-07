@@ -63,7 +63,7 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroups do
     end
 
     it 'returns an empty set when launch template does not match' do
-      template = Capistrano::ASG::Rolling::LaunchTemplate.new('lt-1234567890', 1)
+      template = Capistrano::ASG::Rolling::LaunchTemplate.new('lt-1234567890', 1, 'MyLaunchTemplate')
       expect(groups.with_launch_template(template).count).to eq(0)
     end
 
