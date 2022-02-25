@@ -76,19 +76,22 @@ namespace :rolling do
     unless config.launch_templates.empty?
       logger.info 'Cleaning up old Launch Template version(s) and AMI(s)...'
       config.launch_templates.each do |launch_template|
-        launch_template.previous_versions.drop(config.keep_versions).each do |version|
-          next if version.default_version?
-
+        launch_template.previous_versions.reject(&:default_version?).drop(config.keep_versions).each do |version|
           # Need to retrieve AMI before deleting the Launch Template version.
           ami = version.ami
+          unless ami.exists?
+            logger.info("WARNING: AMI **#{ami.id}** does not exist for Launch Template **#{version.name}** version **#{version.version}**.")
+            next
+          end
+
+          # Only clean up when tagged by us.
+          next unless ami.tag?('capistrano-asg-rolling:version')
 
           logger.verbose "Deleting Launch Template **#{version.name}** version **#{version.version}**..."
           version.delete
 
-          if ami.exists?
-            logger.verbose "Deleting AMI **#{version.ami.id}** and snapshots..."
-            ami.delete
-          end
+          logger.verbose "Deleting AMI **#{ami.id}** and snapshots..."
+          ami.delete
         end
       end
     end
