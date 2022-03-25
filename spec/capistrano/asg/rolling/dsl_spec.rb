@@ -22,7 +22,7 @@ RSpec.describe Capistrano::ASG::Rolling::DSL do
         autoscale 'my-asg', user: 'deployer', roles: [:web]
 
         group = config.autoscale_groups.first
-        expect(group).not_to be nil
+        expect(group).not_to be_nil
         expect(group.name).to eq('my-asg')
         expect(group.properties).to include(:user, :roles)
       end
