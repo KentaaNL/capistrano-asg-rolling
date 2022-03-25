@@ -73,6 +73,16 @@ module Capistrano
           tags.key?(key)
         end
 
+        def ==(other)
+          id == other.id
+        end
+
+        alias eql? ==
+
+        def hash
+          id.hash
+        end
+
         private
 
         def aws_ec2_image

@@ -135,4 +135,19 @@ RSpec.describe Capistrano::ASG::Rolling::AMI do
       expect(ami.tag?('Unknown')).to be false
     end
   end
+
+  describe 'object equality' do
+    let(:ami2) { described_class.new('ami-12345') }
+    let(:ami3) { described_class.new('ami-123456') }
+
+    it 'is equal for two AMIs with same ID' do
+      expect(ami).to eql(ami2)
+      expect(ami).to eq(ami2)
+    end
+
+    it 'is not equal for two AMIs with different ID' do
+      expect(ami).not_to eql(ami3)
+      expect(ami).not_to eq(ami3)
+    end
+  end
 end
