@@ -26,7 +26,7 @@ Please be aware of the limitations of using instance refresh, in particular "Ins
 
 This gem depends on Auto Scaling Groups with Launch Templates. Using an Auto Scaling Group with a Launch Configuration is not supported, and will raise an `Capistrano::ASG::Rolling::NoLaunchTemplate`.
 
-Instance refresh uses the desired configuration to update the Auto Scaling Group after a succesful deployment. Setting the Launch Template version to `Latest` on the Auto Scaling Group is not necessary.
+Instance refresh uses the desired configuration to update the Launch Template version of the Auto Scaling Group after a succesful deployment. Setting the Launch Template version to `Latest` on the Auto Scaling Group is not needed.
 
 #### Experimental
 
@@ -35,12 +35,6 @@ This gem is experimental, it works for our configuration / use case, but might n
 The configuration options are not considered stable and might be changed or removed in future releases.
 
 The gem could have a better / fancier name.
-
-#### Bugs
-
-Currently all Launch Template versions and AMIs will be deleted, also when not created by this gem.
-
-Documentation is incomplete.
 
 ## Installation
 
