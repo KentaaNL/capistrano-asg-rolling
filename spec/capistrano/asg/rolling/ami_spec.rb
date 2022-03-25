@@ -46,7 +46,7 @@ RSpec.describe Capistrano::ASG::Rolling::AMI do
     context 'when AMI does not exist' do
       before do
         stub_request(:post, /amazonaws.com/)
-          .with(body: /Action=DescribeImages/).to_return(body: File.read('spec/support/stubs/DescribeImages.NotFound.xml'))
+          .with(body: /Action=DescribeImages/).to_return(body: File.read('spec/support/stubs/DescribeImages.NotFound.xml'), status: 400)
       end
 
       it 'returns false' do
