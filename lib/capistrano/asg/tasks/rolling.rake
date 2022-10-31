@@ -45,7 +45,7 @@ namespace :rolling do
 
   desc 'Update Auto Scaling Groups: create AMIs, update Launch Templates and start Instance Refresh'
   task :update do
-    unless config.instances.empty?
+    if config.rolling_update? && !config.instances.empty?
       logger.info 'Stopping instance(s)...'
       config.instances.stop
 
@@ -121,7 +121,24 @@ namespace :rolling do
       end
     else
       logger.error 'No instances have been launched. Are you using a configuration with rolling deployments?'
+      exit 1
     end
+  end
+
+  desc 'Do a test deployment: run the deploy task but do not trigger the update ASG task and do not automatically terminate instances'
+  task :deploy_test do
+    config.rolling_update = false
+
+    if config.instances.any?
+      config.instances.each do |instance|
+        instance.auto_terminate = false
+      end
+    else
+      logger.error 'No instances have been launched. Are you using a configuration with rolling deployments?'
+      exit 1
+    end
+
+    invoke 'deploy'
   end
 
   desc 'Create an AMI from an Instance in the Auto Scaling Groups'

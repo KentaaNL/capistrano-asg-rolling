@@ -63,6 +63,14 @@ module Capistrano
         def verbose?
           fetch(:asg_rolling_verbose)
         end
+
+        def rolling_update=(value)
+          set(:asg_rolling_update, value)
+        end
+
+        def rolling_update?
+          fetch(:asg_rolling_update)
+        end
       end
     end
   end
