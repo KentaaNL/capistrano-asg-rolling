@@ -138,7 +138,7 @@ RSpec.describe Capistrano::ASG::Rolling::Instances do
       result = instances.create_ami
       expect(result.size).to eq(2)
 
-      (0..1).each do |index|
+      2.times do |index|
         ami = result[index]
         expect(ami).to be_a(Capistrano::ASG::Rolling::AMI)
         expect(ami.id).to eq('ami-1234567890EXAMPLE')
