@@ -66,7 +66,7 @@ module Capistrano
         end
 
         def tags
-          @tags ||= aws_ec2_image.tags.map { |tag| [tag.key, tag.value] }.to_h
+          @tags ||= aws_ec2_image.tags.to_h { |tag| [tag.key, tag.value] }
         end
 
         def tag?(key)
