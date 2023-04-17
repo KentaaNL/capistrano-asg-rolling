@@ -76,6 +76,19 @@ RSpec.describe Capistrano::ASG::Rolling::AMI do
       expect(WebMock).to have_requested(:post, /amazonaws.com/)
         .with(body: /Action=DeleteSnapshot&SnapshotId=snap-1234567890abcdef0/).once
     end
+    
+    context 'When EBS does not exist' do
+      before do
+        stub_request(:post, /amazonaws.com/)
+         .with(body: /Action=DescribeImages/).to_return(body: File.read('spec/support/stubs/DescribeImages.NoEbs.xml'))
+      end
+      
+      it 'does not attempt to delete snapshot' do
+        ami.delete
+        expect(WebMock).not_to have_requested(:post, /amazonaws.com/)
+          .with(body: /Action=DeleteSnapshot&SnapshotId=snap-1234567890abcdef0/).once
+      end
+    end
   end
 
   describe '#snapshots' do
