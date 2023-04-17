@@ -80,7 +80,7 @@ RSpec.describe Capistrano::ASG::Rolling::AMI do
     context 'When EBS does not exist' do
       before do
         stub_request(:post, /amazonaws.com/)
-         .with(body: /Action=DescribeImages/).to_return(body: File.read('spec/support/stubs/DescribeImages.noEbs.xml'))
+         .with(body: /Action=DescribeImages/).to_return(body: File.read('spec/support/stubs/DescribeImages.NoEbs.xml'))
       end
       
       it 'does not attempt to delete snapshot' do
