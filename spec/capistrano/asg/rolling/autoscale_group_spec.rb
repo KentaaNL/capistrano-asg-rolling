@@ -61,6 +61,22 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
     end
   end
 
+  describe '#healthy_percentage' do
+    context 'when no value is set' do
+      it 'returns the default healthy percentage (100)' do
+        expect(group.healthy_percentage).to eq(100)
+      end
+    end
+
+    context 'when a value is set' do
+      subject(:group) { described_class.new('test-asg', healthy_percentage: 50) }
+
+      it 'returns the value set in the configuration (50)' do
+        expect(group.healthy_percentage).to eq(50)
+      end
+    end
+  end
+
   describe '#start_instance_refresh' do
     let(:template) { Capistrano::ASG::Rolling::LaunchTemplate.new('lt-1234567890', 1, 'MyLaunchTemplate') }
 
