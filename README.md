@@ -125,7 +125,7 @@ autoscale 'app-autoscale-group', rolling: true    # default: use rolling deploym
 autoscale 'web-autoscale-group', rolling: false   # override: use normal deployment
 ```
 
-### Deploy with a custom percentage of minimum healthy instances during the instance refresh
+### Deploy with a custom percentage of minimum healthy instances during the instance refresh
 
 The instance refresh is triggered by default with a requirement of 100% minimum healthy instances. ie. One instance is replaced at a time, and must be healthy and in-service before the next is replaced. This can mean that instance refreshes take a long time to complete, especially with larger numbers of instances with large warmup values. Reducing this value allows more instances to be terminated and new instances to be brought up at once during the instance refresh. eg. a value of 0 would terminate all instances in the autoscaling group and replace them at once.
 
