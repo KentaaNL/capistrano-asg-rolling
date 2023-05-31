@@ -40,6 +40,10 @@ module Capistrano
           aws_autoscaling_group.health_check_grace_period
         end
 
+        def healthy_percentage
+          properties.fetch(:healthy_percentage, 100)
+        end
+
         def start_instance_refresh(launch_template)
           aws_autoscaling_client.start_instance_refresh(
             auto_scaling_group_name: name,
@@ -52,7 +56,7 @@ module Capistrano
             },
             preferences: {
               instance_warmup: instance_warmup_time,
-              min_healthy_percentage: 100,
+              min_healthy_percentage: healthy_percentage,
               skip_matching: true
             }
           )

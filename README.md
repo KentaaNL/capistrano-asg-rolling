@@ -125,6 +125,18 @@ autoscale 'app-autoscale-group', rolling: true    # default: use rolling deploym
 autoscale 'web-autoscale-group', rolling: false   # override: use normal deployment
 ```
 
+### Deploy with a custom percentage of minimum healthy instances during the instance refresh
+
+The instance refresh is triggered by default with a requirement of 100% minimum healthy instances. ie. One instance is replaced at a time, and must be healthy and in-service before the next is replaced. This can mean that instance refreshes take a long time to complete, especially with larger numbers of instances with large warmup values. Reducing this value allows more instances to be terminated and new instances to be brought up at once during the instance refresh. eg. a value of 0 would terminate all instances in the autoscaling group and replace them at once.
+
+You can configure the minimum healthy percentage per autoscaling group using the `healthy_percentage` option:
+
+```ruby
+# config/deploy/<stage>.rb
+autoscale 'app-autoscale-group', user: 'deployer'                           # default: use standard deployment with 100% minimum healthy instances
+autoscale 'web-autoscale-group', user: 'deployer', healthy_percentage: 75   # override: allow 25% of instances to be terminated and replaced at once
+```
+
 ### Custom stage
 
 The rolling configuration of the stage has a side-effect: any Capistrano tasks you run, will also launch instances per Auto Scaling Group.
