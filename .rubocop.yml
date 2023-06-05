@@ -9,6 +9,9 @@ AllCops:
   DisplayCopNames: true
   DisplayStyleGuide: true
 
+Gemspec/DevelopmentDependencies:
+  EnforcedStyle: gemspec
+
 Layout/LineLength:
   Enabled: false
 
@@ -23,6 +26,9 @@ Metrics/MethodLength:
 
 RSpec/ExampleLength:
   Max: 9
+
+RSpec/IndexedLet:
+  Enabled: false
 
 RSpec/MultipleExpectations:
   Max: 5
