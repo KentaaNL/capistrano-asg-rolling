@@ -60,9 +60,9 @@ module Capistrano
         end
 
         def snapshots
-          @snapshots ||= aws_ec2_image.block_device_mappings.map do |mapping|
+          @snapshots ||= aws_ec2_image.block_device_mappings.filter_map do |mapping|
             Snapshot.new(mapping.ebs.snapshot_id) if mapping.ebs
-          end.compact
+          end
         end
 
         def tags
