@@ -91,6 +91,11 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
         .with(body: /Action=StartInstanceRefresh&AutoScalingGroupName=test-asg/).once
     end
 
+    it 'sets instance refresh details on the group' do
+      group.start_instance_refresh(template)
+      expect(group.refresh_id).to eq 'ccfd3c2f-edb3-470d-af32-52cc57d201ca'
+    end
+
     context 'when instance refresh is already in progress' do
       before do
         stub_request(:post, /amazonaws.com/)

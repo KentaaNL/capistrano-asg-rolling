@@ -44,6 +44,10 @@ module Capistrano
           properties.fetch(:healthy_percentage, 100)
         end
 
+        def refresh_id
+          @refresh_id
+        end
+
         def start_instance_refresh(launch_template)
           @refresh_id = aws_autoscaling_client.start_instance_refresh(
             auto_scaling_group_name: name,
