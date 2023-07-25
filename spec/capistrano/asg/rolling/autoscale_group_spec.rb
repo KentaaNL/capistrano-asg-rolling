@@ -181,12 +181,12 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
   end
 
   describe '#latest_instance_refresh' do
-    context 'a refresh has been triggered' do
+    context 'when run as part of a deployment' do
       let(:template) { Capistrano::ASG::Rolling::LaunchTemplate.new('lt-1234567890', 1, 'MyLaunchTemplate') }
 
       before do
         stub_request(:post, /amazonaws.com/)
-        .with(body: /Action=StartInstanceRefresh&AutoScalingGroupName=test-asg/).to_return(body: File.read('spec/support/stubs/StartInstanceRefresh.xml'))
+          .with(body: /Action=StartInstanceRefresh&AutoScalingGroupName=test-asg/).to_return(body: File.read('spec/support/stubs/StartInstanceRefresh.xml'))
         stub_request(:post, /amazonaws.com/)
           .with(body: /Action=DescribeInstanceRefreshes&AutoScalingGroupName=test-asg/)
           .to_return(body: File.read('spec/support/stubs/DescribeInstanceRefreshes.Pending.xml'))
@@ -195,12 +195,12 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
 
       it 'returns status and percentage completed' do
         expect(group.latest_instance_refresh).to eq({
-          status: 'Pending', percentage_complete: nil
-        })
+                                                      status: 'Pending', percentage_complete: nil
+                                                    })
       end
     end
 
-    context 'a call without a triggered refresh' do
+    context 'without a triggered refresh' do
       before do
         stub_request(:post, /amazonaws.com/)
           .with(body: /Action=DescribeInstanceRefreshes&AutoScalingGroupName=test-asg/)
@@ -209,8 +209,8 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
 
       it 'returns status and percentage completed' do
         expect(group.latest_instance_refresh).to eq({
-          status: 'InProgress', percentage_complete: 25
-        })
+                                                      status: 'InProgress', percentage_complete: 25
+                                                    })
       end
     end
   end

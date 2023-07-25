@@ -112,8 +112,8 @@ namespace :rolling do
         logger.info 'Terminating instance(s)...'
         instances.terminate
       end
-    rescue Aws::Errors::ServiceError => error
-      logger.warning "Error deleting instance: #{error}"
+    rescue Aws::Errors::ServiceError => e
+      logger.warning "Error deleting instance: #{e}"
     end
     invoke 'rolling:instance_refresh_status' if fetch(:asg_wait_for_instance_refresh)
   end
@@ -177,12 +177,13 @@ namespace :rolling do
   desc 'Get status of instance refresh'
   task :instance_refresh_status do
     groups = config.autoscale_groups.map(&:name)
-    while (groups.count > 0) do
+    while groups.count.positive?
       config.autoscale_groups.each do |group|
         refresh = group.latest_instance_refresh
-        status = refresh.dig(:status)
-        percentage_complete = refresh.dig(:percentage_complete)
-        refresh_completed = ['Successful', 'Cancelled', 'Failed', 'RollbackFailed'].include?(status)
+        status = refresh[:status]
+        percentage_complete = refresh[:percentage_complete]
+        completed_statuses = %w[Successful Cancelled Failed RollbackFailed]
+        refresh_completed = completed_statuses.include?(status)
         if refresh.nil? || refresh_completed == true
           logger.info "Auto Scaling Group: **#{group.name}**, completed with status '#{status}'"
           groups.delete(group.name)
@@ -192,11 +193,11 @@ namespace :rolling do
           logger.info "Auto Scaling Group: **#{group.name}**, status '#{status}'"
         end
 
-        if groups.count > 0
-          wait_for = fetch(:asg_instance_refresh_polling_interval, 30)
-          logger.info "Instance refresh(es) not completed, waiting #{wait_for} seconds"
-          sleep wait_for
-        end
+        next unless groups.count.positive?
+
+        wait_for = fetch(:asg_instance_refresh_polling_interval, 30)
+        logger.info "Instance refresh(es) not completed, waiting #{wait_for} seconds"
+        sleep wait_for
       end
     end
   end
