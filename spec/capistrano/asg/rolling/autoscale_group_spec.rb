@@ -179,4 +179,39 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
       end
     end
   end
+
+  describe '#latest_instance_refresh' do
+    context 'a refresh has been triggered' do
+      let(:template) { Capistrano::ASG::Rolling::LaunchTemplate.new('lt-1234567890', 1, 'MyLaunchTemplate') }
+
+      before do
+        stub_request(:post, /amazonaws.com/)
+        .with(body: /Action=StartInstanceRefresh&AutoScalingGroupName=test-asg/).to_return(body: File.read('spec/support/stubs/StartInstanceRefresh.xml'))
+        stub_request(:post, /amazonaws.com/)
+          .with(body: /Action=DescribeInstanceRefreshes&AutoScalingGroupName=test-asg/)
+          .to_return(body: File.read('spec/support/stubs/DescribeInstanceRefreshes.Pending.xml'))
+        group.start_instance_refresh(template)
+      end
+
+      it 'returns status and percentage completed' do
+        expect(group.latest_instance_refresh).to eq({
+          status: 'Pending', percentage_complete: nil
+        })
+      end
+    end
+
+    context 'a call without a triggered refresh' do
+      before do
+        stub_request(:post, /amazonaws.com/)
+          .with(body: /Action=DescribeInstanceRefreshes&AutoScalingGroupName=test-asg/)
+          .to_return(body: File.read('spec/support/stubs/DescribeInstanceRefreshes.InProgress.xml'))
+      end
+
+      it 'returns status and percentage completed' do
+        expect(group.latest_instance_refresh).to eq({
+          status: 'InProgress', percentage_complete: 25
+        })
+      end
+    end
+  end
 end
