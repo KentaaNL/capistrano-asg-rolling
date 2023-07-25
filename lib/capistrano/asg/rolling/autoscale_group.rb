@@ -12,7 +12,9 @@ module Capistrano
         LIFECYCLE_STATE_IN_SERVICE = 'InService'
         LIFECYCLE_STATE_STANDBY = 'Standby'
 
-        attr_reader :name, :properties
+        INSTANCE_REFRESH_COMPLETED_STATUS = 100
+
+        attr_reader :name, :properties, :refresh_id
 
         def initialize(name, properties = {})
           @name = name
@@ -42,10 +44,6 @@ module Capistrano
 
         def healthy_percentage
           properties.fetch(:healthy_percentage, 100)
-        end
-
-        def refresh_id
-          @refresh_id
         end
 
         def start_instance_refresh(launch_template)
@@ -118,13 +116,12 @@ module Capistrano
         def most_recent_instance_refresh
           parameters = {
             auto_scaling_group_name: name,
-            max_records: 1,
+            max_records: 1
           }
           parameters[:instance_refresh_ids] = [@refresh_id] if @refresh_id
           refresh = aws_autoscaling_client.describe_instance_refreshes(parameters).to_h
           refresh[:instance_refreshes].first
         end
-
 
         def aws_autoscaling_group
           @aws_autoscaling_group ||= ::Aws::AutoScaling::AutoScalingGroup.new(name: name, client: aws_autoscaling_client)
