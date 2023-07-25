@@ -10,6 +10,8 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
       .with(body: /Action=DescribeAutoScalingGroups/).to_return(body: File.read('spec/support/stubs/DescribeAutoScalingGroups.xml'))
   end
 
+  it { expect(described_class::COMPLETED_REFRESH_STATUSES).to eq %w[Successful Cancelled Failed RollbackFailed] }
+
   describe '#exists?' do
     context 'when auto scale group exists' do
       it 'returns true' do

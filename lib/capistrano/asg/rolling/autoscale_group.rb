@@ -12,7 +12,7 @@ module Capistrano
         LIFECYCLE_STATE_IN_SERVICE = 'InService'
         LIFECYCLE_STATE_STANDBY = 'Standby'
 
-        INSTANCE_REFRESH_COMPLETED_STATUS = 100
+        COMPLETED_REFRESH_STATUSES = %w[Successful Cancelled Failed RollbackFailed].freeze
 
         attr_reader :name, :properties, :refresh_id
 
