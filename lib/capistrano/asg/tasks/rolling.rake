@@ -106,11 +106,16 @@ namespace :rolling do
       end
     end
 
-    instances = config.instances.auto_terminate
-    if instances.any?
-      logger.info 'Terminating instance(s)...'
-      instances.terminate
+    begin
+      instances = config.instances.auto_terminate
+      if instances.any?
+        logger.info 'Terminating instance(s)...'
+        instances.terminate
+      end
+    rescue => error
+      logger.warning "Error deleting instance: #{error}"
     end
+    invoke 'rolling:instance_refresh_status' if fetch(:asg_wait_for_instance_refresh)
   end
 
   desc 'Launch Instances by marking instances to not automatically terminate'
@@ -165,6 +170,33 @@ namespace :rolling do
         config.launch_templates << launch_template
       else
         logger.error 'Unable to create AMI. No instance with a valid state was found in the Auto Scaling Group.'
+      end
+    end
+  end
+
+  desc 'Get status of instance refresh'
+  task :instance_refresh_status do
+    groups = config.autoscale_groups.map(&:name)
+    while (groups.count > 0) do
+      config.autoscale_groups.each do |group|
+        refresh = group.latest_instance_refresh
+        status = refresh.dig(:status)
+        percentage_complete = refresh.dig(:percentage_complete)
+        refresh_completed = ['Successful', 'Cancelled', 'Failed', 'RollbackFailed'].include?(status)
+        if refresh.nil? || refresh_completed == true
+          logger.info "Auto Scaling Group: **#{group.name}**, completed with status '#{status}'"
+          groups.delete(group.name)
+        elsif !percentage_complete.nil?
+          logger.info "Auto Scaling Group: **#{group.name}**, #{percentage_complete}% completed, #{status}"
+        else
+          logger.info "Auto Scaling Group: **#{group.name}**, status '#{status}'"
+        end
+
+        if groups.count > 0
+          wait_for = fetch(:asg_instance_refresh_polling_interval, 30)
+          logger.info "Instance refresh(es) not completed, waiting #{wait_for} seconds"
+          sleep wait_for
+        end
       end
     end
   end
