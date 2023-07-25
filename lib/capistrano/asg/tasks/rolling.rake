@@ -112,7 +112,7 @@ namespace :rolling do
         logger.info 'Terminating instance(s)...'
         instances.terminate
       end
-    rescue => error
+    rescue Aws::Errors::ServiceError => error
       logger.warning "Error deleting instance: #{error}"
     end
     invoke 'rolling:instance_refresh_status' if fetch(:asg_wait_for_instance_refresh)
