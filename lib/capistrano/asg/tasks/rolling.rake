@@ -176,20 +176,21 @@ namespace :rolling do
 
   desc 'Get status of instance refresh'
   task :instance_refresh_status do
-    groups = config.autoscale_groups.map(&:name)
+    groups = {}
+    config.autoscale_groups.each { |group| groups[group.name] = group }
     while groups.count.positive?
-      config.autoscale_groups.each do |group|
+      groups.each do |name, group|
         refresh = group.latest_instance_refresh
         status = refresh[:status]
         percentage_complete = refresh[:percentage_complete]
         refresh_completed = Capistrano::ASG::Rolling::AutoscaleGroup::COMPLETED_REFRESH_STATUSES.include?(status)
         if refresh.nil? || refresh_completed == true
-          logger.info "Auto Scaling Group: **#{group.name}**, completed with status '#{status}'"
-          groups.delete(group.name)
+          logger.info "Auto Scaling Group: **#{name}**, completed with status '#{status}'"
+          groups.delete(name)
         elsif !percentage_complete.nil?
-          logger.info "Auto Scaling Group: **#{group.name}**, #{percentage_complete}% completed, #{status}"
+          logger.info "Auto Scaling Group: **#{name}**, #{percentage_complete}% completed, #{status}"
         else
-          logger.info "Auto Scaling Group: **#{group.name}**, status '#{status}'"
+          logger.info "Auto Scaling Group: **#{name}**, status '#{status}'"
         end
 
         next unless groups.count.positive?
