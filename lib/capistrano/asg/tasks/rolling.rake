@@ -192,12 +192,12 @@ namespace :rolling do
         else
           logger.info "Auto Scaling Group: **#{name}**, status '#{status}'"
         end
-
-        next unless groups.count.positive?
       end
-      wait_for = fetch(:asg_instance_refresh_polling_interval, 30)
-      logger.info "Instance refresh(es) not completed, waiting #{wait_for} seconds"
-      sleep wait_for
+      if groups.count.positive?
+        wait_for = fetch(:asg_instance_refresh_polling_interval, 30)
+        logger.info "Instance refresh(es) not completed, waiting #{wait_for} seconds"
+        sleep wait_for
+      end
     end
   end
 end
