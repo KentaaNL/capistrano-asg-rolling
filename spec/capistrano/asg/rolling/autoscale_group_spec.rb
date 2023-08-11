@@ -197,7 +197,7 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
 
       it 'returns status and percentage completed' do
         expect(group.latest_instance_refresh).to eq({
-                                                      status: 'Pending', percentage_complete: nil
+                                                      status: 'Pending', percentage_complete: nil, completed: false
                                                     })
       end
     end
@@ -211,7 +211,7 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
 
       it 'returns status and percentage completed' do
         expect(group.latest_instance_refresh).to eq({
-                                                      status: 'InProgress', percentage_complete: 25
+                                                      status: 'InProgress', percentage_complete: 25, completed: false
                                                     })
       end
     end

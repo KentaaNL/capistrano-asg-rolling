@@ -183,8 +183,8 @@ namespace :rolling do
         refresh = group.latest_instance_refresh
         status = refresh[:status]
         percentage_complete = refresh[:percentage_complete]
-        refresh_completed = Capistrano::ASG::Rolling::AutoscaleGroup::COMPLETED_REFRESH_STATUSES.include?(status)
-        if refresh.nil? || refresh_completed == true
+        refresh_completed =
+        if refresh.nil? || refresh[:completed]
           logger.info "Auto Scaling Group: **#{name}**, completed with status '#{status}'"
           groups.delete(name)
         elsif !percentage_complete.nil?

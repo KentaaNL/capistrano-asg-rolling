@@ -68,7 +68,12 @@ module Capistrano
 
         def latest_instance_refresh
           instance_refresh = most_recent_instance_refresh
-          { status: instance_refresh&.dig(:status), percentage_complete: instance_refresh&.dig(:percentage_complete) }
+          status = instance_refresh&.dig(:status)
+          {
+            status: status,
+            percentage_complete: instance_refresh&.dig(:percentage_complete),
+            completed: COMPLETED_REFRESH_STATUSES.include?(status),
+          }
         end
 
         # Returns instances with lifecycle state "InService" for this Auto Scaling Group.
