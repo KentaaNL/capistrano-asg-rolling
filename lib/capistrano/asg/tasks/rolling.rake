@@ -115,7 +115,6 @@ namespace :rolling do
     rescue Aws::Errors::ServiceError => e
       logger.warning "Error deleting instance: #{e}"
     end
-    invoke 'rolling:instance_refresh_status' if fetch(:asg_wait_for_instance_refresh)
   end
 
   desc 'Launch Instances by marking instances to not automatically terminate'
@@ -176,6 +175,7 @@ namespace :rolling do
 
   desc 'Get status of instance refresh'
   task :instance_refresh_status do
+    return unless fetch(:asg_wait_for_instance_refresh)
     groups = {}
     config.autoscale_groups.each { |group| groups[group.name] = group }
     while groups.count.positive?
