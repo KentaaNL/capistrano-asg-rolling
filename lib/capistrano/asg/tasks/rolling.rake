@@ -176,6 +176,7 @@ namespace :rolling do
   desc 'Get status of instance refresh'
   task :instance_refresh_status do
     return unless fetch(:asg_wait_for_instance_refresh)
+
     groups = {}
     config.autoscale_groups.each { |group| groups[group.name] = group }
     while groups.count.positive?
@@ -183,7 +184,6 @@ namespace :rolling do
         refresh = group.latest_instance_refresh
         status = refresh[:status]
         percentage_complete = refresh[:percentage_complete]
-        refresh_completed =
         if refresh.nil? || refresh[:completed]
           logger.info "Auto Scaling Group: **#{name}**, completed with status '#{status}'"
           groups.delete(name)

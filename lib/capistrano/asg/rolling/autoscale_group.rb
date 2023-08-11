@@ -72,7 +72,7 @@ module Capistrano
           {
             status: status,
             percentage_complete: instance_refresh&.dig(:percentage_complete),
-            completed: COMPLETED_REFRESH_STATUSES.include?(status),
+            completed: COMPLETED_REFRESH_STATUSES.include?(status)
           }
         end
 
