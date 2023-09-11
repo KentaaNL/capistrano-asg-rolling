@@ -91,6 +91,8 @@ module Capistrano
           aws_ec2_client.wait_until(:instance_terminated, instance_ids: [id]) if wait
 
           @terminated = true
+        rescue Aws::EC2::Errors::ServiceError => e
+          raise Capistrano::ASG::Rolling::InstanceTerminateFailed.new(self, e)
         end
 
         def create_ami(name: nil, description: nil, tags: nil)

@@ -86,7 +86,7 @@ namespace :rolling do
           deleted = deleted_amis.include?(ami)
 
           if !exists && !deleted
-            logger.info("WARNING: AMI **#{ami.id}** does not exist for Launch Template **#{version.name}** version **#{version.version}**.")
+            logger.warning("AMI **#{ami.id}** does not exist for Launch Template **#{version.name}** version **#{version.version}**.")
             next
           end
 
@@ -106,14 +106,14 @@ namespace :rolling do
       end
     end
 
-    begin
-      instances = config.instances.auto_terminate
-      if instances.any?
-        logger.info 'Terminating instance(s)...'
+    instances = config.instances.auto_terminate
+    if instances.any?
+      logger.info 'Terminating instance(s)...'
+      begin
         instances.terminate
+      rescue Capistrano::ASG::Rolling::InstanceTerminateFailed => e
+        logger.warning "Failed to terminate Instance **#{e.instance.id}**: #{e.message}"
       end
-    rescue Aws::Errors::ServiceError => e
-      logger.warning "Error deleting instance: #{e}"
     end
   end
 
@@ -175,28 +175,26 @@ namespace :rolling do
 
   desc 'Get status of instance refresh'
   task :instance_refresh_status do
-    return unless fetch(:asg_wait_for_instance_refresh)
+    return unless config.wait_for_instance_refresh?
 
-    groups = {}
-    config.autoscale_groups.each { |group| groups[group.name] = group }
-    while groups.count.positive?
+    groups = config.autoscale_groups.to_h { |group| [group.name, group] }
+
+    while groups.any?
       groups.each do |name, group|
         refresh = group.latest_instance_refresh
-        status = refresh[:status]
-        percentage_complete = refresh[:percentage_complete]
-        if refresh.nil? || refresh[:completed]
-          logger.info "Auto Scaling Group: **#{name}**, completed with status '#{status}'"
+        if refresh.nil? || refresh.completed?
+          logger.info "Auto Scaling Group: **#{name}**, completed with status '#{refresh.status}'." if refresh.completed?
           groups.delete(name)
-        elsif !percentage_complete.nil?
-          logger.info "Auto Scaling Group: **#{name}**, #{percentage_complete}% completed, #{status}"
+        elsif !refresh.percentage_complete.nil?
+          logger.info "Auto Scaling Group: **#{name}**, #{refresh.percentage_complete}% completed, status '#{refresh.status}'."
         else
-          logger.info "Auto Scaling Group: **#{name}**, status '#{status}'"
+          logger.info "Auto Scaling Group: **#{name}**, status '#{refresh.status}'."
         end
       end
-      next unless groups.count.positive?
+      next if groups.empty?
 
-      wait_for = fetch(:asg_instance_refresh_polling_interval, 30)
-      logger.info "Instance refresh(es) not completed, waiting #{wait_for} seconds"
+      wait_for = config.instance_refresh_polling_interval
+      logger.info "Instance refresh(es) not completed, waiting #{wait_for} seconds..."
       sleep wait_for
     end
   end

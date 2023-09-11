@@ -13,6 +13,16 @@ RSpec.describe Capistrano::ASG::Rolling::Logger do
     end
   end
 
+  describe '#warning' do
+    it 'outputs a warning to stdout' do
+      expect { logger.warning('hello world') }.to output("WARNING: hello world\n").to_stdout
+    end
+
+    it 'formats text as bold' do
+      expect { logger.warning('hello **world**') }.to output("WARNING: hello \e[1mworld\e[22m\n").to_stdout
+    end
+  end
+
   describe '#error' do
     it 'outputs a message to stderr' do
       expect { logger.error('hello world') }.to output("\e[0;31;49mhello world\e[0m\n").to_stderr

@@ -71,6 +71,14 @@ module Capistrano
         def rolling_update?
           fetch(:asg_rolling_update)
         end
+
+        def wait_for_instance_refresh?
+          fetch(:asg_wait_for_instance_refresh, false)
+        end
+
+        def instance_refresh_polling_interval
+          fetch(:asg_instance_refresh_polling_interval, 30)
+        end
       end
     end
   end

@@ -94,21 +94,37 @@ RSpec.describe Capistrano::ASG::Rolling::Instance do
   end
 
   describe '#terminate' do
-    before do
-      stub_request(:post, /amazonaws.com/)
-        .with(body: /Action=TerminateInstances/).to_return(body: File.read('spec/support/stubs/TerminateInstances.xml'))
+    context 'with a successful request' do
+      before do
+        stub_request(:post, /amazonaws.com/)
+          .with(body: /Action=TerminateInstances/).to_return(body: File.read('spec/support/stubs/TerminateInstances.xml'))
+      end
+
+      it 'calls the API to terminate the instance' do
+        instance.terminate
+        expect(WebMock).to have_requested(:post, /amazonaws.com/)
+          .with(body: /Action=TerminateInstances&InstanceId.1=i-12345/).once
+      end
+
+      it 'sets terminated to true' do
+        expect(instance.terminated?).to be false
+        instance.terminate
+        expect(instance.terminated?).to be true
+      end
     end
 
-    it 'calls the API to terminate the instance' do
-      instance.terminate
-      expect(WebMock).to have_requested(:post, /amazonaws.com/)
-        .with(body: /Action=TerminateInstances&InstanceId.1=i-12345/).once
-    end
+    context 'with an unsuccesful request' do
+      before do
+        stub_request(:post, /amazonaws.com/)
+          .with(body: /Action=TerminateInstances/).to_return(body: File.read('spec/support/stubs/TerminateInstances.InvalidInstance.xml'), status: 404)
+      end
 
-    it 'sets terminated to true' do
-      expect(instance.terminated?).to be false
-      instance.terminate
-      expect(instance.terminated?).to be true
+      it 'raises an InstanceTerminateFailed exception' do
+        expect { instance.terminate }.to raise_error(Capistrano::ASG::Rolling::InstanceTerminateFailed) do |error|
+          expect(error.instance).to eq(instance)
+          expect(error.message).to eq("The instance ID 'i-1a2b3c4d' does not exist")
+        end
+      end
     end
   end
 

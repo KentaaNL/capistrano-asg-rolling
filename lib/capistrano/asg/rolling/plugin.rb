@@ -28,7 +28,7 @@ module Capistrano
 
           after 'rolling:update', 'rolling:cleanup'
           after 'rolling:create_ami', 'rolling:cleanup'
-          after 'rolling:update',  'rolling:instance_refresh_status'
+          after 'rolling:update', 'rolling:instance_refresh_status'
 
           # Register an exit hook to do some cleanup when Capistrano
           # terminates without calling our after cleanup hook.
@@ -53,6 +53,8 @@ module Capistrano
 
           logger.info 'Terminating instance(s)...'
           instances.terminate
+        rescue Capistrano::ASG::Rolling::InstanceTerminateFailed => e
+          logger.warning "Failed to terminate Instance **#{e.instance.id}**: #{e.message}"
         end
       end
     end

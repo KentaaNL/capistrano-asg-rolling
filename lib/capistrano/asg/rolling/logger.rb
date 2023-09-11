@@ -13,6 +13,10 @@ module Capistrano
           $stdout.puts format_text(text)
         end
 
+        def warning(text)
+          $stdout.puts format_text("WARNING: #{text}")
+        end
+
         def error(text)
           $stderr.puts format_text(text, color: :red) # rubocop:disable Style/StderrPuts
         end

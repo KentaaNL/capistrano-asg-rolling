@@ -12,7 +12,7 @@ module Capistrano
         LIFECYCLE_STATE_IN_SERVICE = 'InService'
         LIFECYCLE_STATE_STANDBY = 'Standby'
 
-        COMPLETED_REFRESH_STATUSES = %w[Successful Cancelled Failed RollbackFailed].freeze
+        COMPLETED_REFRESH_STATUSES = %w[Successful Failed Cancelled RollbackSuccessful RollbackFailed].freeze
 
         attr_reader :name, :properties, :refresh_id
 
@@ -66,14 +66,19 @@ module Capistrano
           raise Capistrano::ASG::Rolling::InstanceRefreshFailed, e
         end
 
+        InstanceRefreshStatus = Struct.new(:status, :percentage_complete) do
+          def completed?
+            COMPLETED_REFRESH_STATUSES.include?(status)
+          end
+        end
+
         def latest_instance_refresh
           instance_refresh = most_recent_instance_refresh
           status = instance_refresh&.dig(:status)
-          {
-            status: status,
-            percentage_complete: instance_refresh&.dig(:percentage_complete),
-            completed: COMPLETED_REFRESH_STATUSES.include?(status)
-          }
+          percentage_complete = instance_refresh&.dig(:percentage_complete)
+          return nil if status.nil?
+
+          InstanceRefreshStatus.new(status, percentage_complete)
         end
 
         # Returns instances with lifecycle state "InService" for this Auto Scaling Group.
