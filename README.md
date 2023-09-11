@@ -101,6 +101,14 @@ When launching an Instance, you can override any settings defined in the Launch 
 set :asg_rolling_instance_overrides, { instance_type: 'c5.large' }
 ```
 
+You can make Capistrano wait until the instances in the autoscaling group have completed refreshing with:
+
+```ruby
+# config/deploy.rb
+set :asg_wait_for_instance_refresh, true
+set :asg_instance_refresh_polling_interval, 30 # default
+```
+
 ## Usage
 
 Specify the Auto Scaling Groups with the keyword `autoscale` instead of using the `server` keyword in Capistrano's stage configuration. Provide the name of the Auto Scaling Group and any properties you want to pass to the server:

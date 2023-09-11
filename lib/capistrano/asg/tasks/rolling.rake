@@ -106,10 +106,14 @@ namespace :rolling do
       end
     end
 
-    instances = config.instances.auto_terminate
-    if instances.any?
-      logger.info 'Terminating instance(s)...'
-      instances.terminate
+    begin
+      instances = config.instances.auto_terminate
+      if instances.any?
+        logger.info 'Terminating instance(s)...'
+        instances.terminate
+      end
+    rescue Aws::Errors::ServiceError => e
+      logger.warning "Error deleting instance: #{e}"
     end
   end
 
@@ -166,6 +170,34 @@ namespace :rolling do
       else
         logger.error 'Unable to create AMI. No instance with a valid state was found in the Auto Scaling Group.'
       end
+    end
+  end
+
+  desc 'Get status of instance refresh'
+  task :instance_refresh_status do
+    return unless fetch(:asg_wait_for_instance_refresh)
+
+    groups = {}
+    config.autoscale_groups.each { |group| groups[group.name] = group }
+    while groups.count.positive?
+      groups.each do |name, group|
+        refresh = group.latest_instance_refresh
+        status = refresh[:status]
+        percentage_complete = refresh[:percentage_complete]
+        if refresh.nil? || refresh[:completed]
+          logger.info "Auto Scaling Group: **#{name}**, completed with status '#{status}'"
+          groups.delete(name)
+        elsif !percentage_complete.nil?
+          logger.info "Auto Scaling Group: **#{name}**, #{percentage_complete}% completed, #{status}"
+        else
+          logger.info "Auto Scaling Group: **#{name}**, status '#{status}'"
+        end
+      end
+      next unless groups.count.positive?
+
+      wait_for = fetch(:asg_instance_refresh_polling_interval, 30)
+      logger.info "Instance refresh(es) not completed, waiting #{wait_for} seconds"
+      sleep wait_for
     end
   end
 end

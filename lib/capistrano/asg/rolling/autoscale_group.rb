@@ -12,7 +12,9 @@ module Capistrano
         LIFECYCLE_STATE_IN_SERVICE = 'InService'
         LIFECYCLE_STATE_STANDBY = 'Standby'
 
-        attr_reader :name, :properties
+        COMPLETED_REFRESH_STATUSES = %w[Successful Cancelled Failed RollbackFailed].freeze
+
+        attr_reader :name, :properties, :refresh_id
 
         def initialize(name, properties = {})
           @name = name
@@ -45,7 +47,7 @@ module Capistrano
         end
 
         def start_instance_refresh(launch_template)
-          aws_autoscaling_client.start_instance_refresh(
+          @refresh_id = aws_autoscaling_client.start_instance_refresh(
             auto_scaling_group_name: name,
             strategy: 'Rolling',
             desired_configuration: {
@@ -59,9 +61,19 @@ module Capistrano
               min_healthy_percentage: healthy_percentage,
               skip_matching: true
             }
-          )
+          ).instance_refresh_id
         rescue Aws::AutoScaling::Errors::InstanceRefreshInProgress => e
           raise Capistrano::ASG::Rolling::InstanceRefreshFailed, e
+        end
+
+        def latest_instance_refresh
+          instance_refresh = most_recent_instance_refresh
+          status = instance_refresh&.dig(:status)
+          {
+            status: status,
+            percentage_complete: instance_refresh&.dig(:percentage_complete),
+            completed: COMPLETED_REFRESH_STATUSES.include?(status)
+          }
         end
 
         # Returns instances with lifecycle state "InService" for this Auto Scaling Group.
@@ -105,6 +117,16 @@ module Capistrano
         end
 
         private
+
+        def most_recent_instance_refresh
+          parameters = {
+            auto_scaling_group_name: name,
+            max_records: 1
+          }
+          parameters[:instance_refresh_ids] = [@refresh_id] if @refresh_id
+          refresh = aws_autoscaling_client.describe_instance_refreshes(parameters).to_h
+          refresh[:instance_refreshes].first
+        end
 
         def aws_autoscaling_group
           @aws_autoscaling_group ||= ::Aws::AutoScaling::AutoScalingGroup.new(name: name, client: aws_autoscaling_client)

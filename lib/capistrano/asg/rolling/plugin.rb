@@ -28,6 +28,7 @@ module Capistrano
 
           after 'rolling:update', 'rolling:cleanup'
           after 'rolling:create_ami', 'rolling:cleanup'
+          after 'rolling:update',  'rolling:instance_refresh_status'
 
           # Register an exit hook to do some cleanup when Capistrano
           # terminates without calling our after cleanup hook.

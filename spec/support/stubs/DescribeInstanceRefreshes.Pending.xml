@@ -1,0 +1,14 @@
+<DescribeInstanceRefreshesResponse xmlns="https://autoscaling.amazonaws.com/doc/2011-01-01/">
+  <DescribeInstanceRefreshesResult>
+    <InstanceRefreshes>
+      <member>
+        <AutoScalingGroupName>my-asg</AutoScalingGroupName>
+        <InstanceRefreshId>08b91cf7-8fa6-48af-b6a6-d227f40f1b9b</InstanceRefreshId>
+        <Status>Pending</Status>
+      </member>
+    </InstanceRefreshes>
+  </DescribeInstanceRefreshesResult>
+  <ResponseMetadata>
+    <RequestId>7c6e177f-f082-11e1-ac58-3714bEXAMPLE</RequestId>
+  </ResponseMetadata>
+</DescribeInstanceRefreshesResponse>

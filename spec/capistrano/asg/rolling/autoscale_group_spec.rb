@@ -10,6 +10,8 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
       .with(body: /Action=DescribeAutoScalingGroups/).to_return(body: File.read('spec/support/stubs/DescribeAutoScalingGroups.xml'))
   end
 
+  it { expect(described_class::COMPLETED_REFRESH_STATUSES).to eq %w[Successful Cancelled Failed RollbackFailed] }
+
   describe '#exists?' do
     context 'when auto scale group exists' do
       it 'returns true' do
@@ -89,6 +91,11 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
       group.start_instance_refresh(template)
       expect(WebMock).to have_requested(:post, /amazonaws.com/)
         .with(body: /Action=StartInstanceRefresh&AutoScalingGroupName=test-asg/).once
+    end
+
+    it 'sets instance refresh details on the group' do
+      group.start_instance_refresh(template)
+      expect(group.refresh_id).to eq 'ccfd3c2f-edb3-470d-af32-52cc57d201ca'
     end
 
     context 'when instance refresh is already in progress' do
@@ -171,6 +178,41 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
 
       it 'is not a rolling deployment' do
         expect(group.rolling?).to be false
+      end
+    end
+  end
+
+  describe '#latest_instance_refresh' do
+    context 'when run as part of a deployment' do
+      let(:template) { Capistrano::ASG::Rolling::LaunchTemplate.new('lt-1234567890', 1, 'MyLaunchTemplate') }
+
+      before do
+        stub_request(:post, /amazonaws.com/)
+          .with(body: /Action=StartInstanceRefresh&AutoScalingGroupName=test-asg/).to_return(body: File.read('spec/support/stubs/StartInstanceRefresh.xml'))
+        stub_request(:post, /amazonaws.com/)
+          .with(body: /Action=DescribeInstanceRefreshes&AutoScalingGroupName=test-asg/)
+          .to_return(body: File.read('spec/support/stubs/DescribeInstanceRefreshes.Pending.xml'))
+        group.start_instance_refresh(template)
+      end
+
+      it 'returns status and percentage completed' do
+        expect(group.latest_instance_refresh).to eq({
+                                                      status: 'Pending', percentage_complete: nil, completed: false
+                                                    })
+      end
+    end
+
+    context 'without a triggered refresh' do
+      before do
+        stub_request(:post, /amazonaws.com/)
+          .with(body: /Action=DescribeInstanceRefreshes&AutoScalingGroupName=test-asg/)
+          .to_return(body: File.read('spec/support/stubs/DescribeInstanceRefreshes.InProgress.xml'))
+      end
+
+      it 'returns status and percentage completed' do
+        expect(group.latest_instance_refresh).to eq({
+                                                      status: 'InProgress', percentage_complete: 25, completed: false
+                                                    })
       end
     end
   end
