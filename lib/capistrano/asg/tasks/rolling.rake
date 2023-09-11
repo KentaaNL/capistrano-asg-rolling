@@ -21,7 +21,7 @@ namespace :rolling do
       else
         logger.info "Auto Scaling Group: **#{group.name}**, standard deployment strategy."
 
-        group.instances.each_with_index do |instance, index| # rubocop:disable Lint/ShadowingOuterLocalVariable
+        group.instances.each_with_index do |instance, index|
           if index.zero? && group.properties.key?(:primary_roles)
             server_properties = group.properties.dup
             server_properties[:roles] = server_properties.delete(:primary_roles)
