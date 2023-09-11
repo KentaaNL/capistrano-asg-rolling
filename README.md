@@ -149,7 +149,7 @@ autoscale 'web-autoscale-group', user: 'deployer', healthy_percentage: 75   # ov
 
 The rolling configuration of the stage has a side-effect: any Capistrano tasks you run, will also launch instances per Auto Scaling Group.
 
-For example the command: `cap production rails:console`, will launch a new instance and run `rails:console` and that instance. While that can be useful, you often just want to run the task on the primary server. A solution is to create two stages with different rolling configurations, for example:
+For example the command: `cap production rails:console`, will launch a new instance and run `rails:console` on that instance. While that can be useful, you often just want to run the task on the primary server. A solution is to create two stages with different rolling configurations, for example:
 
 ```ruby
 # config/deploy/production.rb
