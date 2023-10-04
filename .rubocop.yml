@@ -21,6 +21,9 @@ Metrics/AbcSize:
 Metrics/BlockLength:
   Enabled: false
 
+Metrics/BlockNesting:
+  Max: 4
+
 Metrics/ClassLength:
   Enabled: false
 
