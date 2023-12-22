@@ -25,6 +25,8 @@ module Capistrano
 
             Kernel.warn('WARNING: the property `healthy_percentage` is deprecated and will be removed in a future release. Please update to `min_healthy_percentage`.')
           end
+
+          validate_properties!
         end
 
         def exists?
@@ -146,6 +148,21 @@ module Capistrano
 
         def aws_autoscaling_group
           @aws_autoscaling_group ||= ::Aws::AutoScaling::AutoScalingGroup.new(name: name, client: aws_autoscaling_client)
+        end
+
+        def validate_properties!
+          raise ArgumentError, 'Property `min_healthy_percentage` must be between 0-100.' if min_healthy_percentage && !(0..100).cover?(min_healthy_percentage)
+
+          if max_healthy_percentage
+            raise ArgumentError, 'Property `max_healthy_percentage` must be between 100-200.' unless (100..200).cover?(max_healthy_percentage)
+
+            if min_healthy_percentage
+              diff = max_healthy_percentage - min_healthy_percentage
+              raise ArgumentError, 'The difference between `min_healthy_percentage` and `max_healthy_percentage` must not be greater than 100.' if diff > 100
+            else
+              raise ArgumentError, 'Property `min_healthy_percentage` must be specified when using `max_healthy_percentage`.'
+            end
+          end
         end
       end
     end

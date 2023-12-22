@@ -10,6 +10,28 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
       .with(body: /Action=DescribeAutoScalingGroups/).to_return(body: File.read('spec/support/stubs/DescribeAutoScalingGroups.xml'))
   end
 
+  describe '#initialize' do
+    it 'raises an ArgumentError when min healthy percentage > 100' do
+      expect { described_class.new('test-asg', min_healthy_percentage: 101) }.to raise_error(ArgumentError, 'Property `min_healthy_percentage` must be between 0-100.')
+    end
+
+    it 'raises an ArgumentError when min healthy percentage is not present' do
+      expect { described_class.new('test-asg', max_healthy_percentage: 100) }.to raise_error(ArgumentError, 'Property `min_healthy_percentage` must be specified when using `max_healthy_percentage`.')
+    end
+
+    it 'raises an ArgumentError when max healthy percentage < 100' do
+      expect { described_class.new('test-asg', max_healthy_percentage: 99) }.to raise_error(ArgumentError, 'Property `max_healthy_percentage` must be between 100-200.')
+    end
+
+    it 'raises an ArgumentError when max healthy percentage > 200' do
+      expect { described_class.new('test-asg', max_healthy_percentage: 201) }.to raise_error(ArgumentError, 'Property `max_healthy_percentage` must be between 100-200.')
+    end
+
+    it 'raises an ArgumentError when difference of min and max healthy percentage > 100' do
+      expect { described_class.new('test-asg', min_healthy_percentage: 10, max_healthy_percentage: 111) }.to raise_error(ArgumentError, 'The difference between `min_healthy_percentage` and `max_healthy_percentage` must not be greater than 100.')
+    end
+  end
+
   it { expect(described_class::COMPLETED_REFRESH_STATUSES).to eq %w[Successful Failed Cancelled RollbackSuccessful RollbackFailed] }
 
   describe '#exists?' do
@@ -87,7 +109,7 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
     end
 
     context 'when a value is set' do
-      subject(:group) { described_class.new('test-asg', max_healthy_percentage: 110) }
+      subject(:group) { described_class.new('test-asg', min_healthy_percentage: 90, max_healthy_percentage: 110) }
 
       it 'returns the value set in the configuration (110)' do
         expect(group.max_healthy_percentage).to eq(110)
