@@ -133,16 +133,21 @@ autoscale 'app-autoscale-group', rolling: true    # default: use rolling deploym
 autoscale 'web-autoscale-group', rolling: false   # override: use normal deployment
 ```
 
-### Deploy with a custom percentage of minimum healthy instances during the instance refresh
+### Deploy with custom percentage of minimum/maximum healthy instances during the instance refresh
 
-The instance refresh is triggered by default with a requirement of 100% minimum healthy instances. ie. One instance is replaced at a time, and must be healthy and in-service before the next is replaced. This can mean that instance refreshes take a long time to complete, especially with larger numbers of instances with large warmup values. Reducing this value allows more instances to be terminated and new instances to be brought up at once during the instance refresh. eg. a value of 0 would terminate all instances in the autoscaling group and replace them at once.
+The instance refresh is triggered without specifying a value for the minimum / maximum healthy percentages. This means that either the default
+values will be used (minimum: 90%, maximum: 100%) or the percentages set in the instance maintenance policy for the Auto Scaling Group.
+You can tune both the minimum and maximum values to have more control about the desired capacity that must be healthy to proceed with replacing instances.
 
-You can configure the minimum healthy percentage per autoscaling group using the `healthy_percentage` option:
+For example: reducing the minimum healthy percentage allows more instances to be terminated and new instances to be brought up at once during the instance refresh. eg. a value of 0 would terminate all instances in the autoscaling group and replace them at once.
+
+You can configure the minimum healthy percentage per autoscaling group using the `min_healthy_percentage` option, and the maximum healthy percentage using the `max_healthy_percentage` option. Please note that if you specify `max_healthy_percentage`, you must also specify `min_healthy_percentage`.
 
 ```ruby
 # config/deploy/<stage>.rb
-autoscale 'app-autoscale-group', user: 'deployer'                           # default: use standard deployment with 100% minimum healthy instances
-autoscale 'web-autoscale-group', user: 'deployer', healthy_percentage: 75   # override: allow 25% of instances to be terminated and replaced at once
+autoscale 'app-autoscale-group',                                                           # use default percentages or percentages set in the instance maintenance policy
+autoscale 'web-autoscale-group', min_healthy_percentage: 75                                # allow 25% of instances to be terminated and replaced at once
+autoscale 'web-autoscale-group', min_healthy_percentage: 100, max_healthy_percentage: 110  # allow for 10% above desired capacity during instance refresh
 ```
 
 ### Custom stage
