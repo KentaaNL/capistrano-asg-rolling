@@ -19,6 +19,12 @@ module Capistrano
         def initialize(name, properties = {})
           @name = name
           @properties = properties
+
+          if properties[:healthy_percentage]
+            properties[:min_healthy_percentage] = properties.delete(:healthy_percentage)
+
+            Kernel.warn('WARNING: the property `healthy_percentage` is deprecated and will be removed in a future release. Please update to `min_healthy_percentage`.')
+          end
         end
 
         def exists?
@@ -42,8 +48,12 @@ module Capistrano
           aws_autoscaling_group.health_check_grace_period
         end
 
-        def healthy_percentage
-          properties.fetch(:healthy_percentage, 100)
+        def min_healthy_percentage
+          properties.fetch(:min_healthy_percentage, nil)
+        end
+
+        def max_healthy_percentage
+          properties.fetch(:max_healthy_percentage, nil)
         end
 
         def start_instance_refresh(launch_template)
@@ -58,9 +68,10 @@ module Capistrano
             },
             preferences: {
               instance_warmup: instance_warmup_time,
-              min_healthy_percentage: healthy_percentage,
-              skip_matching: true
-            }
+              skip_matching: true,
+              min_healthy_percentage: min_healthy_percentage,
+              max_healthy_percentage: max_healthy_percentage
+            }.compact
           ).instance_refresh_id
         rescue Aws::AutoScaling::Errors::InstanceRefreshInProgress => e
           raise Capistrano::ASG::Rolling::InstanceRefreshFailed, e

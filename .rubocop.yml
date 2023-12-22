@@ -38,3 +38,6 @@ RSpec/IndexedLet:
 
 RSpec/MultipleExpectations:
   Max: 5
+
+Style/GuardClause:
+  Enabled: false

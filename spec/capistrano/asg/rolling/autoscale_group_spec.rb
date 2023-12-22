@@ -63,18 +63,34 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
     end
   end
 
-  describe '#healthy_percentage' do
+  describe '#min_healthy_percentage' do
     context 'when no value is set' do
-      it 'returns the default healthy percentage (100)' do
-        expect(group.healthy_percentage).to eq(100)
+      it 'returns nil' do
+        expect(group.min_healthy_percentage).to be_nil
       end
     end
 
     context 'when a value is set' do
-      subject(:group) { described_class.new('test-asg', healthy_percentage: 50) }
+      subject(:group) { described_class.new('test-asg', min_healthy_percentage: 50) }
 
       it 'returns the value set in the configuration (50)' do
-        expect(group.healthy_percentage).to eq(50)
+        expect(group.min_healthy_percentage).to eq(50)
+      end
+    end
+  end
+
+  describe '#max_healthy_percentage' do
+    context 'when no value is set' do
+      it 'returns nil' do
+        expect(group.max_healthy_percentage).to be_nil
+      end
+    end
+
+    context 'when a value is set' do
+      subject(:group) { described_class.new('test-asg', max_healthy_percentage: 110) }
+
+      it 'returns the value set in the configuration (110)' do
+        expect(group.max_healthy_percentage).to eq(110)
       end
     end
   end
@@ -106,6 +122,16 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
 
       it 'raises an InstanceRefreshFailed exception' do
         expect { group.start_instance_refresh(template) }.to raise_error(Capistrano::ASG::Rolling::InstanceRefreshFailed, 'An Instance Refresh is already in progress and blocks the execution of this Instance Refresh.')
+      end
+    end
+
+    context 'when min and max healthy percentage is set' do
+      subject(:group) { described_class.new('test-asg', min_healthy_percentage: 50, max_healthy_percentage: 110) }
+
+      it 'calls the API to start instance refresh with the given healthy percentages' do
+        group.start_instance_refresh(template)
+        expect(WebMock).to have_requested(:post, /amazonaws.com/)
+          .with(body: /Action=StartInstanceRefresh&AutoScalingGroupName=test-asg&DesiredConfiguration.LaunchTemplate.LaunchTemplateId=lt-1234567890&DesiredConfiguration.LaunchTemplate.Version=1&Preferences.InstanceWarmup=300&Preferences.MaxHealthyPercentage=110&Preferences.MinHealthyPercentage=50&Preferences.SkipMatching=true&Strategy=Rolling/).once
       end
     end
   end
