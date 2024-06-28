@@ -11,10 +11,9 @@ module Capistrano
 
         def run(work)
           result = Concurrent::Array.new
-          threads = []
 
-          work.each do |w|
-            threads << Thread.new do
+          threads = work.map do |w|
+            Thread.new do
               result << yield(w)
             end
           end
