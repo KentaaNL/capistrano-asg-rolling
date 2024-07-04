@@ -125,7 +125,7 @@ namespace :rolling do
       end
     else
       logger.error 'No instances have been launched. Are you using a configuration with rolling deployments?'
-      exit 1
+      fail
     end
   end
 
@@ -139,7 +139,7 @@ namespace :rolling do
       end
     else
       logger.error 'No instances have been launched. Are you using a configuration with rolling deployments?'
-      exit 1
+      fail
     end
 
     invoke 'deploy'
@@ -206,7 +206,7 @@ namespace :rolling do
           logger.info "Auto Scaling Group: **#{name}**, completed with status '#{refresh.status}'."
         end
       end
-      exit 1 if failed
+      fail if failed
     end
   end
 end
