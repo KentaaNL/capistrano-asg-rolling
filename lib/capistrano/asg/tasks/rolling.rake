@@ -125,7 +125,7 @@ namespace :rolling do
       end
     else
       logger.error 'No instances have been launched. Are you using a configuration with rolling deployments?'
-      raise RuntimeError, 'Auto Scaling Group update failed'
+      raise 'Auto Scaling Group update failed'
     end
   end
 
@@ -139,7 +139,7 @@ namespace :rolling do
       end
     else
       logger.error 'No instances have been launched. Are you using a configuration with rolling deployments?'
-      raise RuntimeError, 'Auto Scaling Group update failed'
+      raise 'Auto Scaling Group update failed'
     end
 
     invoke 'deploy'
@@ -206,7 +206,7 @@ namespace :rolling do
           logger.info "Auto Scaling Group: **#{name}**, completed with status '#{refresh.status}'."
         end
       end
-      raise RuntimeError, 'Auto Scaling Group update failed' if failed
+      raise 'Auto Scaling Group update failed' if failed
     end
   end
 end
