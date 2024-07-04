@@ -112,7 +112,7 @@ namespace :rolling do
       logger.info 'Terminating instance(s)...'
       begin
         instances.terminate
-      rescue Capistrano::ASG::Rolling::InstanceTerminateraise => e
+      rescue Capistrano::ASG::Rolling::InstanceTerminateFailed => e
         logger.warning "Failed to terminate Instance **#{e.instance.id}**: #{e.message}"
         raise RuntimeError, 'Auto Scaling Group Update Failed.'
       end
