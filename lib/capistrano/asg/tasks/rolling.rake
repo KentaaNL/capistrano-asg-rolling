@@ -177,13 +177,14 @@ namespace :rolling do
   task :instance_refresh_status do
     if config.wait_for_instance_refresh?
       groups = config.autoscale_groups.to_h { |group| [group.name, group] }
+      completed_groups = []
 
       while groups.any?
         groups.each do |name, group|
           refresh = group.latest_instance_refresh
           if refresh.nil? || refresh.completed?
             logger.info "Auto Scaling Group: **#{name}**, completed with status '#{refresh.status}'." if refresh.completed?
-            groups.delete(name)
+            completed_groups.push groups.delete(name)
           elsif !refresh.percentage_complete.nil?
             logger.info "Auto Scaling Group: **#{name}**, #{refresh.percentage_complete}% completed, status '#{refresh.status}'."
           else
@@ -196,6 +197,16 @@ namespace :rolling do
         logger.info "Instance refresh(es) not completed, waiting #{wait_for} seconds..."
         sleep wait_for
       end
+      failed = false
+      completed_groups.each do |group|
+        if group.latest_instance_refresh.status == 'Failed'
+          failed = true
+          logger.error "~~ Auto Scaling Group: **#{name}** refresh failed ~~"
+        else
+          logger.info "Auto Scaling Group: **#{name}**, completed with status '#{refresh.status}'."
+        end
+      end
+      exit 1 if failed
     end
   end
 end
