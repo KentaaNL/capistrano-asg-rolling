@@ -206,7 +206,7 @@ namespace :rolling do
           logger.info "Auto Scaling Group: **#{name}**, completed with status '#{refresh.status}'."
         end
       end
-      raise RuntimeError, 'Auto Scaling Group update failed' if raise RuntimeError, 'Auto Scaling Group update failed'
+      raise RuntimeError, 'Auto Scaling Group update failed' if failed
     end
   end
 end
