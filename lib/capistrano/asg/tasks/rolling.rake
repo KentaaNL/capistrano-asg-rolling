@@ -64,6 +64,7 @@ namespace :rolling do
           logger.verbose "Successfully started Instance Refresh on Auto Scaling Group **#{group.name}**."
         rescue Capistrano::ASG::Rolling::InstanceRefreshFailed => e
           logger.info "Failed to start Instance Refresh on Auto Scaling Group **#{group.name}**: #{e.message}"
+          raise RuntimeError, 'Auto Scaling Group Update Failed.'
         end
       end
 
@@ -111,8 +112,9 @@ namespace :rolling do
       logger.info 'Terminating instance(s)...'
       begin
         instances.terminate
-      rescue Capistrano::ASG::Rolling::InstanceTerminateFailed => e
+      rescue Capistrano::ASG::Rolling::InstanceTerminateraise => e
         logger.warning "Failed to terminate Instance **#{e.instance.id}**: #{e.message}"
+        raise RuntimeError, 'Auto Scaling Group Update Failed.'
       end
     end
   end
@@ -125,7 +127,7 @@ namespace :rolling do
       end
     else
       logger.error 'No instances have been launched. Are you using a configuration with rolling deployments?'
-      fail
+      raise RuntimeError, 'Auto Scaling Group update failed'
     end
   end
 
@@ -139,7 +141,7 @@ namespace :rolling do
       end
     else
       logger.error 'No instances have been launched. Are you using a configuration with rolling deployments?'
-      fail
+      raise RuntimeError, 'Auto Scaling Group update failed'
     end
 
     invoke 'deploy'
@@ -206,7 +208,7 @@ namespace :rolling do
           logger.info "Auto Scaling Group: **#{name}**, completed with status '#{refresh.status}'."
         end
       end
-      fail if failed
+      raise RuntimeError, 'Auto Scaling Group update failed' if raise RuntimeError, 'Auto Scaling Group update failed'
     end
   end
 end
