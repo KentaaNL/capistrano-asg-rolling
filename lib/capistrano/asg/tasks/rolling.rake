@@ -124,8 +124,7 @@ namespace :rolling do
         instance.auto_terminate = false
       end
     else
-      logger.error 'No instances have been launched. Are you using a configuration with rolling deployments?'
-      raise 'Auto Scaling Group update failed'
+      raise 'No instances have been launched. Are you using a configuration with rolling deployments?'
     end
   end
 
@@ -138,8 +137,7 @@ namespace :rolling do
         instance.auto_terminate = false
       end
     else
-      logger.error 'No instances have been launched. Are you using a configuration with rolling deployments?'
-      raise 'Auto Scaling Group update failed'
+      raise 'No instances have been launched. Are you using a configuration with rolling deployments?'
     end
 
     invoke 'deploy'
@@ -197,15 +195,7 @@ namespace :rolling do
         logger.info "Instance refresh(es) not completed, waiting #{wait_for} seconds..."
         sleep wait_for
       end
-      failed = false
-      completed_groups.each do |group|
-        if group.latest_instance_refresh.status == 'Failed'
-          failed = true
-          logger.error "~~ Auto Scaling Group: **#{name}** refresh failed ~~"
-        else
-          logger.info "Auto Scaling Group: **#{name}**, completed with status '#{refresh.status}'."
-        end
-      end
+      failed = completed_groups.any? { |group| group.latest_instance_refresh.status == 'Failed' }
       raise 'Auto Scaling Group update failed' if failed
     end
   end
