@@ -16,21 +16,22 @@ Instead of deploying to live servers, capistrano-asg-rolling will create a tempo
 - Delete any outdated Launch Template versions, AMIs and snapshots created by previous deployments.
 - Terminate the no longer needed instances.
 
-## Caveats
+## Important
 
-#### Launch Templates
+### Instance refresh
+
+To better understand how Instance Refresh replaces instances, make sure to read the documentation:
+https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-overview.html
+
+### Launch Templates
 
 This gem depends on Auto Scaling Groups with Launch Templates. Using an Auto Scaling Group with a Launch Configuration is not supported, and will raise an `Capistrano::ASG::Rolling::NoLaunchTemplate`.
 
 Instance refresh uses the desired configuration to update the Launch Template version of the Auto Scaling Group after a succesful deployment. Setting the Launch Template version to `Latest` on the Auto Scaling Group is not needed.
 
-#### Experimental
+### Experimental
 
-This gem is experimental, it works for our configuration / use case, but might not for yours.
-
-The configuration options are not considered stable and might be changed or removed in future releases.
-
-The gem could have a better / fancier name.
+Please note that this gem works well for our configuration / use case, but it might not fit yours. Any feedback using GitHub issues / pull requests, is much appreciated.
 
 ## Installation
 
