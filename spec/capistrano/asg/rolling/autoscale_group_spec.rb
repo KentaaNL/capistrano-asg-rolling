@@ -142,8 +142,8 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
           .with(body: /Action=StartInstanceRefresh&AutoScalingGroupName=test-asg/).to_return(body: File.read('spec/support/stubs/StartInstanceRefresh.InProgress.xml'), status: 400)
       end
 
-      it 'raises an InstanceRefreshFailed exception' do
-        expect { group.start_instance_refresh(template) }.to raise_error(Capistrano::ASG::Rolling::InstanceRefreshFailed, 'An Instance Refresh is already in progress and blocks the execution of this Instance Refresh.')
+      it 'raises an StartInstanceRefreshError exception' do
+        expect { group.start_instance_refresh(template) }.to raise_error(Capistrano::ASG::Rolling::StartInstanceRefreshError, 'An Instance Refresh is already in progress and blocks the execution of this Instance Refresh.')
       end
     end
 
@@ -264,6 +264,7 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
         expect(instance_refresh.status).to eq('InProgress')
         expect(instance_refresh.percentage_complete).to eq(25)
         expect(instance_refresh.completed?).to be false
+        expect(instance_refresh.failed?).to be false
       end
     end
 
@@ -281,6 +282,25 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
         expect(instance_refresh.status).to eq('Successful')
         expect(instance_refresh.percentage_complete).to eq(100)
         expect(instance_refresh.completed?).to be true
+        expect(instance_refresh.failed?).to be false
+      end
+    end
+
+    context 'with a failed refresh' do
+      let(:template) { Capistrano::ASG::Rolling::LaunchTemplate.new('lt-1234567890', 1, 'MyLaunchTemplate') }
+
+      before do
+        stub_request(:post, /amazonaws.com/)
+          .with(body: /Action=DescribeInstanceRefreshes&AutoScalingGroupName=test-asg/)
+          .to_return(body: File.read('spec/support/stubs/DescribeInstanceRefreshes.Failed.xml'))
+      end
+
+      it 'returns status and percentage completed' do
+        instance_refresh = group.latest_instance_refresh
+        expect(instance_refresh.status).to eq('Failed')
+        expect(instance_refresh.percentage_complete).to eq(50)
+        expect(instance_refresh.completed?).to be true
+        expect(instance_refresh.failed?).to be true
       end
     end
 

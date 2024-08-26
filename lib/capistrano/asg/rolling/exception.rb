@@ -13,16 +13,30 @@ module Capistrano
       class NoLaunchTemplate < Capistrano::ASG::Rolling::Exception
       end
 
-      class InstanceRefreshFailed < Capistrano::ASG::Rolling::Exception
+      class StartInstanceRefreshError < Capistrano::ASG::Rolling::Exception
       end
 
-      # Exception when instance terminate fails.
+      # Exception when the instance refresh failed on one of the ASGs.
+      class InstanceRefreshFailed < Capistrano::ASG::Rolling::Exception
+        def initialize
+          super('Failed to update Auto Scaling Group(s)')
+        end
+      end
+
+      # Exception when instance terminate has failed.
       class InstanceTerminateFailed < Capistrano::ASG::Rolling::Exception
         attr_reader :instance
 
         def initialize(instance, exception)
           @instance = instance
           super(exception)
+        end
+      end
+
+      # Exception when no instances could be launched.
+      class NoInstancesLaunched < Capistrano::ASG::Rolling::Exception
+        def initialize
+          super('No instances have been launched. Are you using a configuration with rolling deployments?')
         end
       end
     end

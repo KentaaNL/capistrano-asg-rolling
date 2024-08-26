@@ -62,7 +62,7 @@ namespace :rolling do
           group.start_instance_refresh(launch_template)
 
           logger.verbose "Successfully started Instance Refresh on Auto Scaling Group **#{group.name}**."
-        rescue Capistrano::ASG::Rolling::InstanceRefreshFailed => e
+        rescue Capistrano::ASG::Rolling::StartInstanceRefreshError => e
           logger.info "Failed to start Instance Refresh on Auto Scaling Group **#{group.name}**: #{e.message}"
         end
       end
@@ -124,7 +124,7 @@ namespace :rolling do
         instance.auto_terminate = false
       end
     else
-      raise 'No instances have been launched. Are you using a configuration with rolling deployments?'
+      raise Capistrano::ASG::Rolling::NoInstancesLaunched
     end
   end
 
@@ -137,7 +137,7 @@ namespace :rolling do
         instance.auto_terminate = false
       end
     else
-      raise 'No instances have been launched. Are you using a configuration with rolling deployments?'
+      raise Capistrano::ASG::Rolling::NoInstancesLaunched
     end
 
     invoke 'deploy'
@@ -195,8 +195,9 @@ namespace :rolling do
         logger.info "Instance refresh(es) not completed, waiting #{wait_for} seconds..."
         sleep wait_for
       end
-      failed = completed_groups.any? { |group| group.latest_instance_refresh.status == 'Failed' }
-      raise 'Auto Scaling Group update failed' if failed
+
+      failed = completed_groups.any? { |group| group.latest_instance_refresh.failed? }
+      raise Capistrano::ASG::Rolling::InstanceRefreshFailed if failed
     end
   end
 end

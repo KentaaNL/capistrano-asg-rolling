@@ -13,6 +13,7 @@ module Capistrano
         LIFECYCLE_STATE_STANDBY = 'Standby'
 
         COMPLETED_REFRESH_STATUSES = %w[Successful Failed Cancelled RollbackSuccessful RollbackFailed].freeze
+        FAILED_REFRESH_STATUS = 'Failed'
 
         attr_reader :name, :properties, :refresh_id
 
@@ -76,12 +77,16 @@ module Capistrano
             }.compact
           ).instance_refresh_id
         rescue Aws::AutoScaling::Errors::InstanceRefreshInProgress => e
-          raise Capistrano::ASG::Rolling::InstanceRefreshFailed, e
+          raise Capistrano::ASG::Rolling::StartInstanceRefreshError, e
         end
 
         InstanceRefreshStatus = Struct.new(:status, :percentage_complete) do
           def completed?
             COMPLETED_REFRESH_STATUSES.include?(status)
+          end
+
+          def failed?
+            status == FAILED_REFRESH_STATUS
           end
         end
 
