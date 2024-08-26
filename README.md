@@ -18,10 +18,6 @@ Instead of deploying to live servers, capistrano-asg-rolling will create a tempo
 
 ## Caveats
 
-#### Instance refresh limitations
-
-Please be aware of the limitations of using instance refresh, in particular "Instances terminated before launch": https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-instance-refresh.html#instance-refresh-limitations
-
 #### Launch Templates
 
 This gem depends on Auto Scaling Groups with Launch Templates. Using an Auto Scaling Group with a Launch Configuration is not supported, and will raise an `Capistrano::ASG::Rolling::NoLaunchTemplate`.
