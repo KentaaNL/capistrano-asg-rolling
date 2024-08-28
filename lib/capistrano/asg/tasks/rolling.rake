@@ -154,8 +154,14 @@ namespace :rolling do
         logger.info "Instance **#{instance.id}** entering standby state..."
         group.enter_standby(instance)
 
+        logger.info 'Stopping instance...'
+        instance.stop
+
         logger.info 'Creating AMI...'
         ami = instance.create_ami(description: revision_log_message)
+
+        logger.info 'Starting instance...'
+        instance.start
 
         logger.info "Instance **#{instance.id}** exiting standby state..."
         group.exit_standby(instance)

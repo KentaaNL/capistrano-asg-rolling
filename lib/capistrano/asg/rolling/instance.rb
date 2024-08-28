@@ -81,6 +81,11 @@ module Capistrano
           Configuration.use_private_ip_address? ? private_ip_address : public_ip_address
         end
 
+        def start
+          aws_ec2_client.start_instances(instance_ids: [id])
+          aws_ec2_client.wait_until(:instance_running, instance_ids: [id])
+        end
+
         def stop
           aws_ec2_client.stop_instances(instance_ids: [id])
           aws_ec2_client.wait_until(:instance_stopped, instance_ids: [id])

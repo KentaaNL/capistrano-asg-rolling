@@ -78,6 +78,21 @@ RSpec.describe Capistrano::ASG::Rolling::Instance do
     end
   end
 
+  describe '#start' do
+    before do
+      stub_request(:post, /amazonaws.com/)
+        .with(body: /Action=StartInstances/).to_return(body: File.read('spec/support/stubs/StartInstances.xml'))
+      stub_request(:post, /amazonaws.com/)
+        .with(body: /Action=DescribeInstances/).to_return(body: File.read('spec/support/stubs/DescribeInstances.Running.xml'))
+    end
+
+    it 'calls the API to start the instance' do
+      instance.start
+      expect(WebMock).to have_requested(:post, /amazonaws.com/)
+        .with(body: /Action=StartInstances&InstanceId.1=i-12345/).once
+    end
+  end
+
   describe '#stop' do
     before do
       stub_request(:post, /amazonaws.com/)
