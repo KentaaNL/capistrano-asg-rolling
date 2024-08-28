@@ -187,6 +187,7 @@ The following IAM permissions are required:
             "Action": [
                 "autoscaling:DescribeAutoScalingGroups",
                 "autoscaling:DescribeAutoScalingInstances",
+                "autoscaling:DescribeInstanceRefreshes",
                 "autoscaling:EnterStandby",
                 "autoscaling:ExitStandby",
                 "autoscaling:StartInstanceRefresh",
@@ -200,6 +201,7 @@ The following IAM permissions are required:
                 "ec2:DescribeInstances",
                 "ec2:DescribeLaunchTemplateVersions",
                 "ec2:RunInstances",
+                "ec2:StartInstances",
                 "ec2:StopInstances",
                 "ec2:TerminateInstances"
             ],
