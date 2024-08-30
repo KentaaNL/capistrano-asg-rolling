@@ -174,6 +174,48 @@ autoscale 'web-autoscale-group', rolling: true, user: 'deployer'
 
 With these two stages, you can run any tasks with `cap production <task name>` and rolling deployments with `cap production_rolling deploy`.
 
+## Useful commands
+
+This gem adds a few commands that can be useful
+
+### Test deployment
+
+Do a test deployment: run the deploy task, but do not trigger the update ASG task and do not automatically terminate instances.
+
+```bash
+cap <stage> rolling:deploy_test
+```
+
+### Launch instances
+
+Just launch instance(s) defined in the Auto Scale Group(s) launch template.
+This instance is not attached to the Auto Scale Group and needs to be terminated manually.
+
+```bash
+cap <stage> rolling:launch_instances
+```
+
+### Create AMI of instance in ASG
+
+Pick an instance in the Auto Scale Group(s), put it into standby and stop it.
+Then create an AMI and a new launch template. Then start the instance and put it into service again.
+
+```bash
+cap <stage> rolling:create_ami
+```
+
+## Filtering
+
+You can filter any command to run on a specific Auto Scale Group by using the parameter `asg_name`.
+
+For example, the command:
+
+```bash
+cap <stage> deploy asg_name=app-autoscale-group
+```
+
+Will do a deployment only on the Auto Scale Group with the name `app-autoscale-group`.
+
 ## IAM policy
 
 The following IAM permissions are required:
