@@ -176,8 +176,6 @@ With these two stages, you can run any tasks with `cap production <task name>` a
 
 ## Useful commands
 
-This gem adds a few commands that can be useful
-
 ### Test deployment
 
 Do a test deployment: run the deploy task, but do not trigger the update ASG task and do not automatically terminate instances.
