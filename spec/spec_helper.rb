@@ -31,5 +31,13 @@ RSpec.configure do |config|
 
     Capistrano::ASG::Rolling::Configuration.set(:asg_rolling_group_name, nil)
     Capistrano::ASG::Rolling::Configuration.set(:asg_rolling_use_private_ip_address, true)
+
+    Capistrano::ASG::Rolling::Configuration.set(:application, 'rspec-application')
+    Capistrano::ASG::Rolling::Configuration.set(:stage, 'test')
+
+    Capistrano::ASG::Rolling::Configuration.set(:branch, 'feature-x')
+    Capistrano::ASG::Rolling::Configuration.set(:local_user, 'deployer')
+    Capistrano::ASG::Rolling::Configuration.set(:current_revision, 'abcd1234')
+    Capistrano::ASG::Rolling::Configuration.set(:release_timestamp, '20241004124200')
   end
 end

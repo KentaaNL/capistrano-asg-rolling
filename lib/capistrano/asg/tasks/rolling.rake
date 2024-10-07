@@ -50,7 +50,7 @@ namespace :rolling do
       config.instances.stop
 
       logger.info 'Creating AMI(s)...'
-      amis = config.instances.create_ami(description: revision_log_message)
+      amis = config.instances.create_ami(description: revision_log_message, tags: Capistrano::ASG::Rolling::Tags.ami_tags)
 
       logger.info 'Updating Launch Template(s) with the new AMI(s)...'
       launch_templates = config.autoscale_groups.launch_templates
@@ -158,7 +158,7 @@ namespace :rolling do
         instance.stop
 
         logger.info 'Creating AMI...'
-        ami = instance.create_ami(description: revision_log_message)
+        ami = instance.create_ami(description: revision_log_message, tags: Capistrano::ASG::Rolling::Tags.ami_tags)
 
         logger.info 'Starting instance...'
         instance.start

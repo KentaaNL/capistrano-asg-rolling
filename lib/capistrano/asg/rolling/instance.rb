@@ -101,10 +101,7 @@ module Capistrano
         end
 
         def create_ami(name: nil, description: nil, tags: nil)
-          ami_tags = {
-            'Name' => autoscale_group.name_tag,
-            'capistrano-asg-rolling:version' => Capistrano::ASG::Rolling::VERSION
-          }
+          ami_tags = { 'Name' => autoscale_group.name_tag }
           ami_tags.merge!(tags) if tags
 
           AMI.create(instance: self, name: name || ami_name, description: description, tags: ami_tags)
