@@ -33,7 +33,7 @@ module Capistrano
         # Tags related to the current gem version.
         def gem_tags
           {
-            'capistrano-asg-rolling:version' => Capistrano::ASG::Rolling::VERSION
+            'capistrano-asg-rolling:gem-version' => Capistrano::ASG::Rolling::VERSION
           }
         end
       end

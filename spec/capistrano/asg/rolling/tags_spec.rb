@@ -16,7 +16,7 @@ RSpec.describe Capistrano::ASG::Rolling::Tags do
         'capistrano-asg-rolling:deployment-release' => '20241004124200',
         'capistrano-asg-rolling:deployment-revision' => 'abcd1234',
         'capistrano-asg-rolling:deployment-user' => 'deployer',
-        'capistrano-asg-rolling:version' => Capistrano::ASG::Rolling::VERSION
+        'capistrano-asg-rolling:gem-version' => Capistrano::ASG::Rolling::VERSION
       )
     end
   end
@@ -44,7 +44,7 @@ RSpec.describe Capistrano::ASG::Rolling::Tags do
   describe '#gem_tags' do
     it 'returns a hash with tags for this gem' do
       expect(described_class.gem_tags).to eq(
-        'capistrano-asg-rolling:version' => Capistrano::ASG::Rolling::VERSION
+        'capistrano-asg-rolling:gem-version' => Capistrano::ASG::Rolling::VERSION
       )
     end
   end

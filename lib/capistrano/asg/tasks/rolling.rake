@@ -91,7 +91,7 @@ namespace :rolling do
           end
 
           # Only clean up when AMI was tagged by us.
-          next if exists && !ami.tag?('capistrano-asg-rolling:version')
+          next if exists && (!ami.tag?('capistrano-asg-rolling:version') || !ami.tag?('capistrano-asg-rolling:gem-version'))
 
           logger.verbose "Deleting Launch Template **#{version.name}** version **#{version.version}**..."
           version.delete
