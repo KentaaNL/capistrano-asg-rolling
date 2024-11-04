@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    capistrano-asg-rolling (0.5.0)
+    capistrano-asg-rolling (0.5.1)
       aws-sdk-autoscaling (~> 1, >= 1.100.0)
       aws-sdk-ec2 (~> 1)
       capistrano (~> 3)
