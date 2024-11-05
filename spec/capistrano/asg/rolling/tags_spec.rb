@@ -48,4 +48,14 @@ RSpec.describe Capistrano::ASG::Rolling::Tags do
       )
     end
   end
+
+  describe '#custom_tags' do
+    before { Capistrano::ASG::Rolling::Configuration.set(:asg_rolling_ami_tags, { 'custom-tag' => 'foobar' }) }
+
+    it 'returns a hash with custom tags' do
+      expect(described_class.custom_tags).to eq(
+        'custom-tag' => 'foobar'
+      )
+    end
+  end
 end

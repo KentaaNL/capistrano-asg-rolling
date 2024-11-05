@@ -29,6 +29,7 @@ RSpec.configure do |config|
     Capistrano::ASG::Rolling::Configuration.instance_variable_set(:@instances, nil)
     Capistrano::ASG::Rolling::Configuration.instance_variable_set(:@launch_templates, nil)
 
+    Capistrano::ASG::Rolling::Configuration.set(:asg_rolling_ami_tags, nil)
     Capistrano::ASG::Rolling::Configuration.set(:asg_rolling_group_name, nil)
     Capistrano::ASG::Rolling::Configuration.set(:asg_rolling_use_private_ip_address, true)
 

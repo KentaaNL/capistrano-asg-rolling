@@ -9,7 +9,7 @@ module Capistrano
 
         # The tags to add to an AMI.
         def ami_tags
-          application_tags.merge(deployment_tags).merge(gem_tags)
+          application_tags.merge(deployment_tags).merge(gem_tags).merge(custom_tags)
         end
 
         # Tags related to the current application / stage.
@@ -35,6 +35,11 @@ module Capistrano
           {
             'capistrano-asg-rolling:gem-version' => Capistrano::ASG::Rolling::VERSION
           }
+        end
+
+        # Custom added tags.
+        def custom_tags
+          fetch(:asg_rolling_ami_tags) || {}
         end
       end
     end
