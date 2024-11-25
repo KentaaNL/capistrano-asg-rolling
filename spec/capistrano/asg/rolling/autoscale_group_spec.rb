@@ -92,7 +92,7 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
       expect(group.auto_rollback).to be false
     end
 
-    context 'no value is set' do
+    context 'when no value is set' do
       subject(:group) { described_class.new('test-asg', {}) }
 
       it 'returns `nil`' do
