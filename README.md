@@ -106,6 +106,12 @@ set :asg_wait_for_instance_refresh, true
 set :asg_instance_refresh_polling_interval, 30 # default
 ```
 
+Enable or disable auto-rollback on instance refreshes (default: false):
+
+```ruby
+# config/deploy.rb 
+set :asg_instance_refresh_auto_rollback, true
+
 ## Usage
 
 Specify the Auto Scaling Groups with the keyword `autoscale` instead of using the `server` keyword in Capistrano's stage configuration. Provide the name of the Auto Scaling Group and any properties you want to pass to the server:

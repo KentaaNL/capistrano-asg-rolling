@@ -55,6 +55,10 @@ module Capistrano
           properties.fetch(:min_healthy_percentage, nil)
         end
 
+        def auto_rollback
+          properties.fetch(:asg_instance_refresh_auto_rollback, nil)
+        end
+
         def max_healthy_percentage
           properties.fetch(:max_healthy_percentage, nil)
         end
@@ -73,7 +77,8 @@ module Capistrano
               instance_warmup: instance_warmup_time,
               skip_matching: true,
               min_healthy_percentage: min_healthy_percentage,
-              max_healthy_percentage: max_healthy_percentage
+              max_healthy_percentage: max_healthy_percentage,
+              auto_rollback: auto_rollback
             }.compact
           ).instance_refresh_id
         rescue Aws::AutoScaling::Errors::InstanceRefreshInProgress => e

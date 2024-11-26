@@ -85,6 +85,22 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
     end
   end
 
+  describe '#auto_rollback' do
+    subject(:group) { described_class.new('test-asg', asg_instance_refresh_auto_rollback: false) }
+
+    it 'returns the value set in the configuration' do
+      expect(group.auto_rollback).to be false
+    end
+
+    context 'when no value is set' do
+      subject(:group) { described_class.new('test-asg', {}) }
+
+      it 'returns `nil`' do
+        expect(group.auto_rollback).to be_nil
+      end
+    end
+  end
+
   describe '#min_healthy_percentage' do
     context 'when no value is set' do
       it 'returns nil' do
