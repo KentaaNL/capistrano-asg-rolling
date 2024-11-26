@@ -109,8 +109,9 @@ set :asg_instance_refresh_polling_interval, 30 # default
 Enable or disable auto-rollback on instance refreshes (default: false):
 
 ```ruby
-# config/deploy.rb 
+# config/deploy.rb
 set :asg_instance_refresh_auto_rollback, true
+```
 
 ## Usage
 
