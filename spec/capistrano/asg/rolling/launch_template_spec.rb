@@ -17,7 +17,7 @@ RSpec.describe Capistrano::ASG::Rolling::LaunchTemplate do
     it 'calls the API to create a new launch template version' do
       template.create_version(image_id: 'ami-12345')
       expect(WebMock).to have_requested(:post, /amazonaws.com/)
-        .with(body: /Action=CreateLaunchTemplateVersion&LaunchTemplateData.ImageId=ami-12345&LaunchTemplateId=lt-0a20c965061f64abc&SourceVersion=1/).once
+        .with(body: /Action=CreateLaunchTemplateVersion&ClientToken=.+&LaunchTemplateData.ImageId=ami-12345&LaunchTemplateId=lt-0a20c965061f64abc&SourceVersion=1/).once
     end
 
     it 'returns an LaunchTemplate object with the new version' do
