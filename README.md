@@ -192,7 +192,7 @@ During deployment, the following tags will be added to the AMI and snapshot cont
 - `capistrano-asg-rolling:deployment-user`
 
 In addition to that, the tag `capistrano-asg-rolling:gem-version` will be added with the value of the current gem version.
-This tag is also used to determine if the AMI was created by this gem, and may be deleted automatically.
+This tag is also used to determine if the AMI was created by this gem, and can be deleted automatically.
 
 You can add custom tag(s) to the AMI and snapshot by setting the property `asg_rolling_ami_tags`, for example:
 
