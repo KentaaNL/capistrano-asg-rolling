@@ -181,6 +181,26 @@ autoscale 'web-autoscale-group', rolling: true, user: 'deployer'
 
 With these two stages, you can run any tasks with `cap production <task name>` and rolling deployments with `cap production_rolling deploy`.
 
+### Tags
+
+During deployment, the following tags will be added to the AMI and snapshot containing information about the current application, stage and deployment:
+- `capistrano-asg-rolling:application`
+- `capistrano-asg-rolling:stage`
+- `capistrano-asg-rolling:deployment-branch`
+- `capistrano-asg-rolling:deployment-release`
+- `capistrano-asg-rolling:deployment-revision`
+- `capistrano-asg-rolling:deployment-user`
+
+In addition to that, the tag `capistrano-asg-rolling:gem-version` will be added with the value of the current gem version.
+This tag is also used to determine if the AMI was created by this gem, and may be deleted automatically.
+
+You can add custom tag(s) to the AMI and snapshot by setting the property `asg_rolling_ami_tags`, for example:
+
+```ruby
+# config/deploy/<stage>.rb
+set :asg_rolling_ami_tags, { 'Application' => 'My Application', 'Environment' => 'Production' }
+```
+
 ## Useful commands
 
 ### Test deployment
