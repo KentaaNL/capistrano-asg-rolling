@@ -2,6 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/capistrano-asg-rolling.svg)](https://badge.fury.io/rb/capistrano-asg-rolling)
 [![Build Status](https://github.com/KentaaNL/capistrano-asg-rolling/actions/workflows/test.yml/badge.svg)](https://github.com/KentaaNL/capistrano-asg-rolling/actions)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=KentaaNL_capistrano-asg-rolling&metric=alert_status)](https://sonarcloud.io/dashboard?id=KentaaNL_capistrano-asg-rolling)
 
 Capistrano plugin for performing rolling updates to AWS Auto Scaling Groups using the [instance refresh feature](https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-instance-refresh.html).
 
