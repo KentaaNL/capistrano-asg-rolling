@@ -15,8 +15,8 @@ module Capistrano
           @instances << instance
         end
 
-        def each(&block)
-          instances.each(&block)
+        def each(&)
+          instances.each(&)
         end
 
         def empty?

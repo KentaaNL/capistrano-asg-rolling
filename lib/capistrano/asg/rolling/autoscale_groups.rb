@@ -15,8 +15,8 @@ module Capistrano
           @groups << group
         end
 
-        def each(&block)
-          @groups.reject { |group| filtered?(group) }.each(&block)
+        def each(&)
+          @groups.reject { |group| filtered?(group) }.each(&)
         end
 
         def launch_templates

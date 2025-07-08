@@ -21,8 +21,8 @@ module Capistrano
           @templates.merge(templates)
         end
 
-        def each(&block)
-          @templates.each(&block)
+        def each(&)
+          @templates.each(&)
         end
 
         def empty?
