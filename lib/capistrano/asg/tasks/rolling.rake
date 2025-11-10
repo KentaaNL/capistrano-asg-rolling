@@ -71,6 +71,17 @@ namespace :rolling do
     end
   end
 
+  desc 'Trigger instance refresh of deployed autoscaling groups'
+  task :trigger_instance_refresh do
+    logger.info 'Triggering Instance Refresh on Auto Scaling Group(s)...'
+    config.autoscale_groups.each do |group|
+      group.start_instance_refresh(group.launch_template)
+      logger.info "Successfully started Instance Refresh on Auto Scaling Group **#{group.name}**."
+    rescue Capistrano::ASG::Rolling::StartInstanceRefreshError => e
+      logger.info "Failed to start Instance Refresh on Auto Scaling Group **#{group.name}**: #{e.message}"
+    end
+  end
+
   desc 'Clean up old Launch Template versions and AMIs and terminate instances'
   task :cleanup do
     unless config.launch_templates.empty?
