@@ -14,10 +14,7 @@ namespace :rolling do
         logger.info "Launched Instance: **#{instance.id}**"
         config.instances << instance
 
-        logger.verbose "Adding server: **#{instance.ip_address}**"
-
-        # Add server to the Capistrano server list.
-        server(instance.ip_address, group.properties)
+        add_instance(instance, group.properties)
       else
         logger.info "Auto Scaling Group: **#{group.name}**, standard deployment strategy."
 
@@ -29,10 +26,7 @@ namespace :rolling do
             server_properties = group.properties
           end
 
-          logger.verbose "Adding server: **#{instance.ip_address}**"
-
-          # Add server to the Capistrano server list.
-          server(instance.ip_address, server_properties)
+          add_instance(instance, server_properties)
         end
       end
     end

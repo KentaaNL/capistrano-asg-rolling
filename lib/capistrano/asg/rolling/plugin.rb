@@ -48,6 +48,16 @@ module Capistrano
           Capistrano::ASG::Rolling::Configuration
         end
 
+        # Add an instance to the Capistrano server list, with the given properties.
+        def add_instance(instance, properties)
+          server_properties = properties.merge(instance_id: instance.id)
+
+          logger.verbose "Adding server: **#{instance.ip_address}**"
+
+          server(instance.ip_address, server_properties)
+        end
+
+        # Make sure any instances that were launched for rolling updates are terminated.
         def cleanup
           instances = config.instances.auto_terminate
           return if instances.empty?
