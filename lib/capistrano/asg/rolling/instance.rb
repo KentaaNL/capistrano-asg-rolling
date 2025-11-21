@@ -69,7 +69,7 @@ module Capistrano
           started_at = Time.now
 
           loop do
-            result = SSH.test?(ip_address, autoscale_group.properties[:user], Configuration.ssh_options)
+            result = SSH.available?(ip_address, autoscale_group.properties[:user], Configuration.ssh_options)
 
             break if result || Time.now - started_at > 300
 

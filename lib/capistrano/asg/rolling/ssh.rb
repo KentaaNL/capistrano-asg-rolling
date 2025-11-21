@@ -7,7 +7,7 @@ module Capistrano
       module SSH
         module_function
 
-        def test?(ip_address, user, ssh_options)
+        def available?(ip_address, user, ssh_options)
           options = ssh_options || {}
           options[:timeout] = 10
 
@@ -16,7 +16,11 @@ module Capistrano
           end
 
           true
-        rescue ::Net::SSH::ConnectionTimeout, ::Net::SSH::Proxy::ConnectError, Errno::ECONNREFUSED, Errno::ETIMEDOUT
+        rescue ::Net::SSH::AuthenticationFailed, ::Net::SSH::Authentication::DisallowedMethod
+          # SSH server is reachable and responding.
+          true
+        rescue ::Net::SSH::ConnectionTimeout, ::Net::SSH::Proxy::ConnectError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ETIMEDOUT
+          # SSH server not reachable or port closed.
           false
         end
       end

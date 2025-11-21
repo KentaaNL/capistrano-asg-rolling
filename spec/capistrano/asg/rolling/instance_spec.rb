@@ -51,12 +51,12 @@ RSpec.describe Capistrano::ASG::Rolling::Instance do
 
   describe '#wait_for_ssh' do
     before do
-      allow(Capistrano::ASG::Rolling::SSH).to receive(:test?).and_return(true)
+      allow(Capistrano::ASG::Rolling::SSH).to receive(:available?).and_return(true)
     end
 
     it 'waits until SSH is available' do
       instance.wait_for_ssh
-      expect(Capistrano::ASG::Rolling::SSH).to have_received(:test?).with('192.168.1.88', 'deployer', nil).once
+      expect(Capistrano::ASG::Rolling::SSH).to have_received(:available?).with('192.168.1.88', 'deployer', nil).once
     end
   end
 
