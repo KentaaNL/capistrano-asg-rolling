@@ -31,10 +31,6 @@ module Capistrano
           self.class.new(select { |instance| instance.image_id == image_id })
         end
 
-        def wait_for_ssh
-          Parallel.run(instances, &:wait_for_ssh)
-        end
-
         def stop
           Parallel.run(instances, &:stop)
         end

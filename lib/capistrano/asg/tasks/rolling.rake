@@ -33,7 +33,10 @@ namespace :rolling do
 
     unless config.instances.empty?
       logger.info 'Waiting for SSH to be available...'
-      config.instances.wait_for_ssh
+
+      on roles(:all) do
+        Capistrano::ASG::Rolling::SSH.wait_for_availability(self)
+      end
     end
   end
 

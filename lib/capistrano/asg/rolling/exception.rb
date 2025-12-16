@@ -39,6 +39,13 @@ module Capistrano
           super('No instances have been launched. Are you using a configuration with rolling deployments?')
         end
       end
+
+      # Exception when waiting for SSH availability timed out.
+      class SSHAvailabilityTimeoutError < Capistrano::ASG::Rolling::Exception
+        def initialize(timeout)
+          super("Timed out waiting for SSH to become available after #{timeout} seconds")
+        end
+      end
     end
   end
 end

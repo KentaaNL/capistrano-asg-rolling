@@ -65,18 +65,6 @@ module Capistrano
           new(instance.instance_id, instance.private_ip_address, instance.public_ip_address, instance.image_id, autoscaling_group)
         end
 
-        def wait_for_ssh
-          started_at = Time.now
-
-          loop do
-            result = SSH.available?(ip_address, autoscale_group.properties[:user], Configuration.ssh_options)
-
-            break if result || Time.now - started_at > 300
-
-            sleep 1
-          end
-        end
-
         def ip_address
           Configuration.use_private_ip_address? ? private_ip_address : public_ip_address
         end

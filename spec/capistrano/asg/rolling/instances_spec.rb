@@ -68,18 +68,6 @@ RSpec.describe Capistrano::ASG::Rolling::Instances do
     end
   end
 
-  describe '#wait_for_ssh' do
-    before do
-      allow(Capistrano::ASG::Rolling::SSH).to receive(:available?).and_return(true)
-    end
-
-    it 'waits until SSH is available on all instances' do
-      instances.wait_for_ssh
-      expect(Capistrano::ASG::Rolling::SSH).to have_received(:available?).with('192.168.1.88', 'deployer', nil).once
-      expect(Capistrano::ASG::Rolling::SSH).to have_received(:available?).with('192.168.1.44', 'deployer', nil).once
-    end
-  end
-
   describe '#stop' do
     before do
       stub_request(:post, /amazonaws.com/)

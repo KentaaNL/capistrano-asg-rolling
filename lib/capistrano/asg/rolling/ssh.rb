@@ -1,26 +1,41 @@
 # frozen_string_literal: true
 
+require 'time'
+
 module Capistrano
   module ASG
     module Rolling
-      # SSH availability test.
+      # Test the SSHKit backend for availability.
       module SSH
         module_function
 
-        def available?(ip_address, user, ssh_options)
-          options = ssh_options || {}
-          options[:timeout] = 10
+        WAIT_TIMEOUT = 300
 
-          ::Net::SSH.start(ip_address, user, options) do |ssh|
-            ssh.exec!('echo hello')
+        def wait_for_availability(backend)
+          timeout = WAIT_TIMEOUT
+          expires_at = Time.now + timeout
+
+          loop do
+            break if available?(backend)
+
+            raise SSHAvailabilityTimeoutError, timeout if Time.now > expires_at
+
+            sleep 1
           end
+        end
+
+        def available?(backend)
+          backend.test('echo hello')
 
           true
         rescue ::Net::SSH::AuthenticationFailed, ::Net::SSH::Authentication::DisallowedMethod
           # SSH server is reachable and responding.
           true
-        rescue ::Net::SSH::ConnectionTimeout, ::Net::SSH::Proxy::ConnectError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ETIMEDOUT
+        rescue ::Net::SSH::ConnectionTimeout, ::Net::SSH::Proxy::ConnectError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ETIMEDOUT, Errno::ECONNRESET
           # SSH server not reachable or port closed.
+          false
+        rescue ::Net::SSH::Disconnect # rubocop:disable Lint/DuplicateBranch
+          # SSH server is reachable, but the connection dropped unexpectedly.
           false
         end
       end

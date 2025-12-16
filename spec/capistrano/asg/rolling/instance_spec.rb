@@ -49,17 +49,6 @@ RSpec.describe Capistrano::ASG::Rolling::Instance do
     end
   end
 
-  describe '#wait_for_ssh' do
-    before do
-      allow(Capistrano::ASG::Rolling::SSH).to receive(:available?).and_return(true)
-    end
-
-    it 'waits until SSH is available' do
-      instance.wait_for_ssh
-      expect(Capistrano::ASG::Rolling::SSH).to have_received(:available?).with('192.168.1.88', 'deployer', nil).once
-    end
-  end
-
   describe '#ip_address' do
     context 'with use_private_ip_address set to true' do
       before { Capistrano::ASG::Rolling::Configuration.set(:asg_rolling_use_private_ip_address, true) }
