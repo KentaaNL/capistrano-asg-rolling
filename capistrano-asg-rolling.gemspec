@@ -7,8 +7,8 @@ require 'capistrano/asg/rolling/version'
 Gem::Specification.new do |spec|
   spec.name          = 'capistrano-asg-rolling'
   spec.version       = Capistrano::ASG::Rolling::VERSION
-  spec.authors       = ['Kentaa']
-  spec.email         = ['developers@kentaa.nl']
+  spec.authors       = %w[Kentaa iRaiser]
+  spec.email         = ['tech-arnhem@iraiser.eu']
 
   spec.summary       = 'Capistrano plugin for performing rolling updates to AWS Auto Scaling Groups using Instance Refresh'
   spec.homepage      = 'https://github.com/KentaaNL/capistrano-asg-rolling'
