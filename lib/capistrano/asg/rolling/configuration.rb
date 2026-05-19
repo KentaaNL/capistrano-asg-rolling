@@ -79,6 +79,14 @@ module Capistrano
         def instance_refresh_polling_interval
           fetch(:asg_instance_refresh_polling_interval, 30)
         end
+
+        def aws_retry_mode
+          fetch(:asg_aws_retry_mode, 'adaptive')
+        end
+
+        def aws_retry_limit
+          fetch(:asg_aws_retry_limit, 10)
+        end
       end
     end
   end

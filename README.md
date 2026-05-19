@@ -113,6 +113,14 @@ Enable or disable auto-rollback on instance refreshes (default: false):
 set :asg_instance_refresh_auto_rollback, true
 ```
 
+The AWS clients are configured with `adaptive` retry mode and a retry limit of 10 by default, so transient throttling (`Aws::AutoScaling::Errors::Throttling: Rate exceeded`) does not abort a deployment. You can tune both:
+
+```ruby
+# config/deploy.rb
+set :asg_aws_retry_mode, 'adaptive' # default; one of 'legacy', 'standard', 'adaptive'
+set :asg_aws_retry_limit, 10        # default
+```
+
 ## Usage
 
 Specify the Auto Scaling Groups with the keyword `autoscale` instead of using the `server` keyword in Capistrano's stage configuration. Provide the name of the Auto Scaling Group and any properties you want to pass to the server:

@@ -22,6 +22,8 @@ module Capistrano
           options = {}
           options[:region] = aws_region if aws_region
           options[:credentials] = aws_credentials if aws_credentials.set?
+          options[:retry_mode] = Configuration.aws_retry_mode
+          options[:retry_limit] = Configuration.aws_retry_limit
           options[:http_wire_trace] = true if ENV['AWS_HTTP_WIRE_TRACE'] == '1'
           options
         end

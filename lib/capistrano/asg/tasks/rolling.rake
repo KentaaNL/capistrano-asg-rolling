@@ -202,6 +202,12 @@ namespace :rolling do
           else
             logger.info "Auto Scaling Group: **#{name}**, status '#{refresh.status}'."
           end
+        rescue Aws::AutoScaling::Errors::ServiceError => e
+          # The instance refresh is still running in AWS even though we hit a
+          # transient API error (typically throttling that exceeded the SDK's
+          # retry budget). Log and retry on the next polling interval instead
+          # of aborting the deployment.
+          logger.warning "Auto Scaling Group: **#{name}**, failed to fetch status: #{e.class}: #{e.message} — retrying on next poll."
         end
         next if groups.empty?
 
