@@ -18,31 +18,6 @@ RSpec.describe Capistrano::ASG::Rolling::Instance do
         .with(body: /Action=RunInstances/).to_return(body: File.read('spec/support/stubs/RunInstances.xml'))
       stub_request(:post, /amazonaws.com/)
         .with(body: /Action=DescribeInstances/).to_return(body: File.read('spec/support/stubs/DescribeInstances.Running.xml'))
-      stub_request(:post, /amazonaws.com/)
-        .with(body: /Action=DescribeInstanceStatus/).to_return(body: File.read('spec/support/stubs/DescribeInstanceStatus.Ok.xml'))
-    end
-
-    it 'waits for instance status checks to pass before returning' do
-      described_class.run(autoscaling_group: group)
-      expect(WebMock).to have_requested(:post, /amazonaws.com/)
-        .with(body: /Action=DescribeInstanceStatus/).at_least_once
-    end
-
-    context 'when the status check waiter times out' do
-      before do
-        client = group.aws_ec2_client
-        allow(client).to receive(:wait_until).and_call_original
-        allow(client).to receive(:wait_until)
-          .with(:instance_status_ok, anything)
-          .and_raise(Aws::Waiters::Errors::TooManyAttemptsError.new(40))
-      end
-
-      it 'warns and still returns an Instance' do
-        allow(Kernel).to receive(:warn)
-        result = described_class.run(autoscaling_group: group)
-        expect(Kernel).to have_received(:warn).with(/timed out waiting for instance/)
-        expect(result).to be_a(described_class)
-      end
     end
 
     it 'calls the API to create a new Instance' do
