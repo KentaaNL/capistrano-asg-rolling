@@ -163,6 +163,17 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
       end
     end
 
+    context 'when AWS returns a ValidationError (e.g. AMI is pending)' do
+      before do
+        stub_request(:post, /amazonaws.com/)
+          .with(body: /Action=StartInstanceRefresh&AutoScalingGroupName=test-asg/).to_return(body: File.read('spec/support/stubs/StartInstanceRefresh.AMIPending.xml'), status: 400)
+      end
+
+      it 'raises a StartInstanceRefreshError exception' do
+        expect { group.start_instance_refresh(template) }.to raise_error(Capistrano::ASG::Rolling::StartInstanceRefreshError, "The AMI 'ami-12345' is pending.")
+      end
+    end
+
     context 'when min and max healthy percentage is set' do
       subject(:group) { described_class.new('test-asg', min_healthy_percentage: 50, max_healthy_percentage: 110) }
 

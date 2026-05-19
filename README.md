@@ -121,6 +121,14 @@ set :asg_aws_retry_mode, 'adaptive' # default; one of 'legacy', 'standard', 'ada
 set :asg_aws_retry_limit, 10        # default
 ```
 
+After creating an AMI, the gem waits until it becomes available before triggering an instance refresh. The defaults match the AWS SDK defaults (~10 minutes), but for larger root volumes (e.g. resizing 24 GB → 32 GB) the AMI can take longer to become available. Override the waiter via:
+
+```ruby
+# config/deploy.rb
+set :asg_ami_wait_delay, 15         # seconds between polls (default: 15)
+set :asg_ami_wait_max_attempts, 40  # max polls (default: 40, ≈ 10 minutes)
+```
+
 ## Usage
 
 Specify the Auto Scaling Groups with the keyword `autoscale` instead of using the `server` keyword in Capistrano's stage configuration. Provide the name of the Auto Scaling Group and any properties you want to pass to the server:
