@@ -36,7 +36,10 @@ module Capistrano
           response = aws_ec2_client.create_image(options)
 
           begin
-            aws_ec2_client.wait_until(:image_available, image_ids: [response.image_id])
+            aws_ec2_client.wait_until(:image_available, image_ids: [response.image_id]) do |waiter|
+              waiter.delay = Configuration.ami_wait_delay
+              waiter.max_attempts = Configuration.ami_wait_max_attempts
+            end
           rescue Aws::Waiters::Errors::TooManyAttemptsError => e
             # When waiting for the AMI takes longer than the default (10 minutes),
             # then assume it will eventually succeed and just continue. Surface a
