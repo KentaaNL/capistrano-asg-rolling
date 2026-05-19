@@ -113,6 +113,14 @@ Enable or disable auto-rollback on instance refreshes (default: false):
 set :asg_instance_refresh_auto_rollback, true
 ```
 
+The AWS clients are configured with `adaptive` retry mode and a retry limit of 10 by default, so transient throttling (`Aws::AutoScaling::Errors::Throttling: Rate exceeded`) does not abort a deployment. You can tune both:
+
+```ruby
+# config/deploy.rb
+set :asg_aws_retry_mode, 'adaptive' # default; one of 'legacy', 'standard', 'adaptive'
+set :asg_aws_retry_limit, 10        # default
+```
+
 After creating an AMI, the gem waits until it becomes available before triggering an instance refresh. The defaults match the AWS SDK defaults (~10 minutes), but for larger root volumes (e.g. resizing 24 GB → 32 GB) the AMI can take longer to become available. Override the waiter via:
 
 ```ruby
