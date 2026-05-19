@@ -79,6 +79,14 @@ module Capistrano
         def instance_refresh_polling_interval
           fetch(:asg_instance_refresh_polling_interval, 30)
         end
+
+        def ami_wait_delay
+          fetch(:asg_ami_wait_delay, 15)
+        end
+
+        def ami_wait_max_attempts
+          fetch(:asg_ami_wait_max_attempts, 40)
+        end
       end
     end
   end
