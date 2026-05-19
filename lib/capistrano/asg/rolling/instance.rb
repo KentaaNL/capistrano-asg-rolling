@@ -62,6 +62,17 @@ module Capistrano
           aws_instance = ::Aws::EC2::Instance.new(instance.instance_id, client: aws_ec2_client)
           instance = aws_instance.wait_until_running
 
+          # Then wait for system + instance status checks to pass. This is the
+          # signal that cloud-init has finished and sshd is bound to port 22,
+          # so the subsequent SSH availability probe usually succeeds on the
+          # first try instead of looping for 20-40 seconds.
+          begin
+            aws_ec2_client.wait_until(:instance_status_ok, instance_ids: [instance.instance_id])
+          rescue Aws::Waiters::Errors::TooManyAttemptsError => e
+            # The instance may still be usable; let the SSH probe decide.
+            Kernel.warn("WARNING: timed out waiting for instance #{instance.instance_id} status checks: #{e.message}")
+          end
+
           new(instance.instance_id, instance.private_ip_address, instance.public_ip_address, instance.image_id, autoscaling_group)
         end
 
