@@ -1,0 +1,8 @@
+<ErrorResponse xmlns="http://autoscaling.amazonaws.com/doc/2011-01-01/">
+  <Error>
+    <Type>Sender</Type>
+    <Code>ValidationError</Code>
+    <Message>The AMI 'ami-12345' is pending.</Message>
+  </Error>
+  <RequestId>ab45c1a5-1ed4-46ec-92f8-04029d6fc676</RequestId>
+</ErrorResponse>
