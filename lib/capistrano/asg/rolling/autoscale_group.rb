@@ -81,7 +81,11 @@ module Capistrano
               auto_rollback: auto_rollback
             }.compact
           ).instance_refresh_id
-        rescue Aws::AutoScaling::Errors::InstanceRefreshInProgress => e
+        rescue Aws::AutoScaling::Errors::ServiceError => e
+          # Wrap all AWS Auto Scaling service errors (InstanceRefreshInProgress,
+          # ValidationError, throttling, etc.) so the rake task can rescue a
+          # single gem-defined error type and continue with the remaining
+          # Auto Scaling Group(s).
           raise Capistrano::ASG::Rolling::StartInstanceRefreshError, e
         end
 

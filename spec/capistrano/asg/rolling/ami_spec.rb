@@ -30,6 +30,20 @@ RSpec.describe Capistrano::ASG::Rolling::AMI do
       expect(ami.id).to eq('ami-1234567890EXAMPLE')
     end
 
+    context 'when the waiter times out' do
+      before do
+        allow(instance.aws_ec2_client).to receive(:wait_until)
+          .and_raise(Aws::Waiters::Errors::TooManyAttemptsError.new(40))
+      end
+
+      it 'warns with the image ID and returns the AMI' do
+        allow(Kernel).to receive(:warn)
+        ami = described_class.create(instance: instance, name: 'Test AMI')
+        expect(Kernel).to have_received(:warn).with(/ami-1234567890EXAMPLE/)
+        expect(ami.id).to eq('ami-1234567890EXAMPLE')
+      end
+    end
+
     it 'passes the configured delay and max_attempts to the waiter' do
       Capistrano::ASG::Rolling::Configuration.set(:asg_ami_wait_delay, 5)
       Capistrano::ASG::Rolling::Configuration.set(:asg_ami_wait_max_attempts, 3)
