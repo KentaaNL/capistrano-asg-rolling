@@ -34,14 +34,19 @@ namespace :rolling do
         end
       end
 
+      # Register each launched instance immediately so the at_exit cleanup
+      # hook can terminate it if a sibling launch fails and aborts the deploy.
+      # `Instances#<<` wraps a plain Array; serialise with a mutex.
+      register_mutex = Mutex.new
+
       results = Capistrano::ASG::Rolling::Parallel.run(groups_needing_launch) do |group|
         instance = Capistrano::ASG::Rolling::Instance.run(autoscaling_group: group, overrides: config.instance_overrides)
+        register_mutex.synchronize { config.instances << instance }
         [group, instance]
       end
 
       results.each do |group, instance|
         logger.info "Launched Instance: **#{instance.id}**"
-        config.instances << instance
         add_instance(instance, group.properties)
       end
     end
