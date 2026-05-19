@@ -207,7 +207,7 @@ namespace :rolling do
           # transient API error (typically throttling that exceeded the SDK's
           # retry budget). Log and retry on the next polling interval instead
           # of aborting the deployment.
-          logger.warning "Auto Scaling Group: **#{name}**, failed to fetch status: #{e.class}: #{e.message} — retrying on next poll."
+          logger.warning "Auto Scaling Group: **#{name}**, failed to fetch status: #{e.class}: #{e.message} - retrying on next poll."
         end
         next if groups.empty?
 
