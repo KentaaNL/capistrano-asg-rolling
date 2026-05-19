@@ -87,7 +87,7 @@ module Capistrano
         def aws_retry_limit
           fetch(:asg_aws_retry_limit, 10)
         end
-        
+
         def ami_wait_delay
           fetch(:asg_ami_wait_delay, 15)
         end
