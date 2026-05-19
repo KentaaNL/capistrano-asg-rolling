@@ -43,7 +43,7 @@ RSpec.describe Capistrano::ASG::Rolling::AMI do
         expect(ami.id).to eq('ami-1234567890EXAMPLE')
       end
     end
-    
+
     it 'passes the configured delay and max_attempts to the waiter' do
       Capistrano::ASG::Rolling::Configuration.set(:asg_ami_wait_delay, 5)
       Capistrano::ASG::Rolling::Configuration.set(:asg_ami_wait_max_attempts, 3)
