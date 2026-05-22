@@ -44,19 +44,23 @@ RSpec.describe Capistrano::ASG::Rolling::AMI do
       end
     end
 
-    it 'passes the configured delay and max_attempts to the waiter' do
-      Capistrano::ASG::Rolling::Configuration.set(:asg_ami_wait_delay, 5)
-      Capistrano::ASG::Rolling::Configuration.set(:asg_ami_wait_max_attempts, 3)
+    context 'when delay and max_attempts are configured' do
+      before do
+        Capistrano::ASG::Rolling::Configuration.set(:asg_ami_wait_delay, 5)
+        Capistrano::ASG::Rolling::Configuration.set(:asg_ami_wait_max_attempts, 3)
+      end
 
-      waiter = instance_double(Aws::Waiters::Waiter, wait: nil)
-      allow(waiter).to receive(:delay=)
-      allow(waiter).to receive(:max_attempts=)
-      allow(instance.aws_ec2_client).to receive(:wait_until).and_yield(waiter)
+      it 'passes the configured delay and max_attempts to the waiter' do
+        waiter = instance_double(Aws::Waiters::Waiter, wait: nil)
+        allow(waiter).to receive(:delay=)
+        allow(waiter).to receive(:max_attempts=)
+        allow(instance.aws_ec2_client).to receive(:wait_until).and_yield(waiter)
 
-      described_class.create(instance: instance, name: 'Test AMI')
+        described_class.create(instance: instance, name: 'Test AMI')
 
-      expect(waiter).to have_received(:delay=).with(5)
-      expect(waiter).to have_received(:max_attempts=).with(3)
+        expect(waiter).to have_received(:delay=).with(5)
+        expect(waiter).to have_received(:max_attempts=).with(3)
+      end
     end
   end
 
