@@ -36,6 +36,9 @@ RSpec.configure do |config|
     Capistrano::ASG::Rolling::Configuration.set(:asg_rolling_group_name, nil)
     Capistrano::ASG::Rolling::Configuration.set(:asg_rolling_use_private_ip_address, true)
 
+    Capistrano::ASG::Rolling::Configuration.set(:asg_ami_wait_delay, nil)
+    Capistrano::ASG::Rolling::Configuration.set(:asg_ami_wait_max_attempts, nil)
+
     Capistrano::ASG::Rolling::Configuration.set(:application, 'rspec-application')
     Capistrano::ASG::Rolling::Configuration.set(:stage, 'test')
 
