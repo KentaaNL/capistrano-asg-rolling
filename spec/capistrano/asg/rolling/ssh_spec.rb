@@ -59,5 +59,13 @@ RSpec.describe Capistrano::ASG::Rolling::SSH do
         expect(described_class.available?(backend)).to be false
       end
     end
+
+    context 'when SSH connection drops unexpectedly' do
+      it 'is not available' do
+        allow(backend).to receive(:test).and_raise(Net::SSH::Disconnect)
+
+        expect(described_class.available?(backend)).to be false
+      end
+    end
   end
 end

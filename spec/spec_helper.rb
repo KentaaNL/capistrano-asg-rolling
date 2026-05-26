@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'simplecov'
+SimpleCov.start
+
 ENV['AWS_ACCESS_KEY_ID'] = 'test'
 ENV['AWS_SECRET_ACCESS_KEY'] = 'test'
 ENV['AWS_REGION'] = 'eu-west-1'
@@ -32,6 +35,9 @@ RSpec.configure do |config|
     Capistrano::ASG::Rolling::Configuration.set(:asg_rolling_ami_tags, nil)
     Capistrano::ASG::Rolling::Configuration.set(:asg_rolling_group_name, nil)
     Capistrano::ASG::Rolling::Configuration.set(:asg_rolling_use_private_ip_address, true)
+
+    Capistrano::ASG::Rolling::Configuration.set(:asg_ami_wait_delay, nil)
+    Capistrano::ASG::Rolling::Configuration.set(:asg_ami_wait_max_attempts, nil)
 
     Capistrano::ASG::Rolling::Configuration.set(:application, 'rspec-application')
     Capistrano::ASG::Rolling::Configuration.set(:stage, 'test')
