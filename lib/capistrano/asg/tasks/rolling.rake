@@ -75,7 +75,7 @@ namespace :rolling do
 
           logger.verbose "Successfully started Instance Refresh on Auto Scaling Group **#{group.name}**."
         rescue Capistrano::ASG::Rolling::StartInstanceRefreshError => e
-          logger.info "Failed to start Instance Refresh on Auto Scaling Group **#{group.name}**: #{e.message}"
+          logger.warning "Failed to start Instance Refresh on Auto Scaling Group **#{group.name}**: #{e.message}"
         end
       end
 
@@ -90,7 +90,7 @@ namespace :rolling do
       group.start_instance_refresh(group.launch_template)
       logger.info "Successfully started Instance Refresh on Auto Scaling Group **#{group.name}**."
     rescue Capistrano::ASG::Rolling::StartInstanceRefreshError => e
-      logger.info "Failed to start Instance Refresh on Auto Scaling Group **#{group.name}**: #{e.message}"
+      logger.warning "Failed to start Instance Refresh on Auto Scaling Group **#{group.name}**: #{e.message}"
     end
   end
 
