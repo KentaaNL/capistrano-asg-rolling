@@ -83,7 +83,7 @@ namespace :rolling do
     end
   end
 
-  desc 'Trigger instance refresh of deployed autoscaling groups'
+  desc 'Trigger instance refresh of deployed Auto Scaling Groups'
   task :trigger_instance_refresh do
     logger.info 'Triggering Instance Refresh on Auto Scaling Group(s)...'
     config.autoscale_groups.each do |group|
