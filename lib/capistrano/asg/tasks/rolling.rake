@@ -3,31 +3,64 @@
 namespace :rolling do
   desc 'Setup servers to be used for (rolling) deployment'
   task :setup do
+    rolling_groups_to_launch = []
+    standard_groups = []
+
     config.autoscale_groups.each do |group|
       if group.rolling?
         logger.info "Auto Scaling Group: **#{group.name}**, rolling deployment strategy."
 
         # If we've already launched an instance with this image, then skip it.
-        next unless config.instances.with_image(group.launch_template.image_id).empty?
-
-        instance = Capistrano::ASG::Rolling::Instance.run(autoscaling_group: group, overrides: config.instance_overrides)
-        logger.info "Launched Instance: **#{instance.id}**"
-        config.instances << instance
-
-        add_instance(instance, group.properties)
+        # Note: dedupe across this run is preserved below when we add launches.
+        rolling_groups_to_launch << group
       else
         logger.info "Auto Scaling Group: **#{group.name}**, standard deployment strategy."
+        standard_groups << group
+      end
+    end
 
-        group.instances.each_with_index do |instance, index|
-          if index.zero? && group.properties.key?(:primary_roles)
-            server_properties = group.properties.dup
-            server_properties[:roles] = server_properties.delete(:primary_roles)
-          else
-            server_properties = group.properties
-          end
-
-          add_instance(instance, server_properties)
+    # Launch one instance per rolling ASG in parallel. The serial version waited
+    # on EC2 `wait_until_running` (30-90s) once per group; this collapses the
+    # total wait to roughly the slowest single launch.
+    unless rolling_groups_to_launch.empty?
+      launched_image_ids = config.instances.map(&:image_id)
+      groups_needing_launch = rolling_groups_to_launch.reject do |group|
+        image_id = group.launch_template.image_id
+        if launched_image_ids.include?(image_id)
+          true
+        else
+          launched_image_ids << image_id
+          false
         end
+      end
+
+      # Register each launched instance immediately so the at_exit cleanup
+      # hook can terminate it if a sibling launch fails and aborts the deploy.
+      # `Instances#<<` wraps a plain Array; serialise with a mutex.
+      register_mutex = Mutex.new
+
+      results = Capistrano::ASG::Rolling::Parallel.run(groups_needing_launch) do |group|
+        instance = Capistrano::ASG::Rolling::Instance.run(autoscaling_group: group, overrides: config.instance_overrides)
+        register_mutex.synchronize { config.instances << instance }
+        [group, instance]
+      end
+
+      results.each do |group, instance|
+        logger.info "Launched Instance: **#{instance.id}**"
+        add_instance(instance, group.properties)
+      end
+    end
+
+    standard_groups.each do |group|
+      group.instances.each_with_index do |instance, index|
+        if index.zero? && group.properties.key?(:primary_roles)
+          server_properties = group.properties.dup
+          server_properties[:roles] = server_properties.delete(:primary_roles)
+        else
+          server_properties = group.properties
+        end
+
+        add_instance(instance, server_properties)
       end
     end
 
@@ -54,14 +87,15 @@ namespace :rolling do
       updated_templates = launch_templates.update(amis: amis, description: revision_log_message)
 
       logger.info 'Triggering Instance Refresh on Auto Scaling Group(s)...'
-      updated_templates.each do |launch_template|
-        config.autoscale_groups.with_launch_template(launch_template).each do |group|
-          group.start_instance_refresh(launch_template)
+      refresh_pairs = updated_templates.flat_map do |launch_template|
+        config.autoscale_groups.with_launch_template(launch_template).map { |group| [group, launch_template] }
+      end
 
-          logger.verbose "Successfully started Instance Refresh on Auto Scaling Group **#{group.name}**."
-        rescue Capistrano::ASG::Rolling::StartInstanceRefreshError => e
-          logger.info "Failed to start Instance Refresh on Auto Scaling Group **#{group.name}**: #{e.message}"
-        end
+      Capistrano::ASG::Rolling::Parallel.run(refresh_pairs) do |group, launch_template|
+        group.start_instance_refresh(launch_template)
+        logger.verbose "Successfully started Instance Refresh on Auto Scaling Group **#{group.name}**."
+      rescue Capistrano::ASG::Rolling::StartInstanceRefreshError => e
+        logger.info "Failed to start Instance Refresh on Auto Scaling Group **#{group.name}**: #{e.message}"
       end
 
       config.launch_templates.merge(updated_templates)
@@ -71,7 +105,7 @@ namespace :rolling do
   desc 'Trigger instance refresh of deployed autoscaling groups'
   task :trigger_instance_refresh do
     logger.info 'Triggering Instance Refresh on Auto Scaling Group(s)...'
-    config.autoscale_groups.each do |group|
+    Capistrano::ASG::Rolling::Parallel.run(config.autoscale_groups.to_a) do |group|
       group.start_instance_refresh(group.launch_template)
       logger.info "Successfully started Instance Refresh on Auto Scaling Group **#{group.name}**."
     rescue Capistrano::ASG::Rolling::StartInstanceRefreshError => e
@@ -82,11 +116,12 @@ namespace :rolling do
   desc 'Clean up old Launch Template versions and AMIs and terminate instances'
   task :cleanup do
     unless config.launch_templates.empty?
-      # Keep track of deleted AMIs, so we can clean up Launch Templates that use the same AMI.
-      deleted_amis = []
+      # Shared across threads so launch templates sharing an AMI don't both try
+      # to delete the same AMI/snapshots.
+      deleted_amis = Concurrent::Array.new
 
       logger.info 'Cleaning up old Launch Template version(s) and AMI(s)...'
-      config.launch_templates.each do |launch_template|
+      Capistrano::ASG::Rolling::Parallel.run(config.launch_templates.to_a) do |launch_template|
         launch_template.previous_versions.reject(&:default_version?).drop(config.keep_versions).each do |version|
           # Need to retrieve AMI before deleting the Launch Template version.
           ami = version.ami

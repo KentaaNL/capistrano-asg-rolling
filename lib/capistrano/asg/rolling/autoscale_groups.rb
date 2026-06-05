@@ -20,7 +20,12 @@ module Capistrano
         end
 
         def launch_templates
-          templates = @groups.map(&:launch_template)
+          templates =
+            if @groups.size > 1
+              Parallel.run(@groups, &:launch_template).to_a
+            else
+              @groups.map(&:launch_template)
+            end
           LaunchTemplates.new(templates)
         end
 

@@ -122,6 +122,21 @@ RSpec.describe Capistrano::ASG::Rolling::AMI do
           .with(body: /Action=DeleteSnapshot&SnapshotId=snap-1234567890abcdef0/).once
       end
     end
+
+    context 'when the AMI has multiple snapshots' do
+      before do
+        stub_request(:post, /amazonaws.com/)
+          .with(body: /Action=DescribeImages/).to_return(body: File.read('spec/support/stubs/DescribeImages.MultipleEbs.xml'))
+      end
+
+      it 'deletes every snapshot' do
+        ami.delete
+        expect(WebMock).to have_requested(:post, /amazonaws.com/)
+          .with(body: /Action=DeleteSnapshot&SnapshotId=snap-1234567890abcdef0/).once
+        expect(WebMock).to have_requested(:post, /amazonaws.com/)
+          .with(body: /Action=DeleteSnapshot&SnapshotId=snap-abcdef01234567890/).once
+      end
+    end
   end
 
   describe '#snapshots' do

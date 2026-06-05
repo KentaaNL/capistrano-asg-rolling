@@ -63,7 +63,11 @@ module Capistrano
 
           aws_ec2_client.deregister_image(image_id: id)
 
-          image_snapshots.each(&:delete)
+          if image_snapshots.size > 1
+            Parallel.run(image_snapshots, &:delete)
+          else
+            image_snapshots.each(&:delete)
+          end
         end
 
         def snapshots
