@@ -82,6 +82,18 @@ RSpec.describe Capistrano::ASG::Rolling::LaunchTemplates do
       expect(version.version).to eq('4')
     end
 
+    context 'when multiple templates reference the same old image' do
+      let(:template2) { Capistrano::ASG::Rolling::LaunchTemplate.new('lt-0b31d076172g75bcd', 1, 'AnotherTemplate') }
+
+      before { templates << template2 }
+
+      it 'creates a new version for each template' do
+        templates.update(amis: [ami])
+        expect(WebMock).to have_requested(:post, /amazonaws.com/)
+          .with(body: /Action=CreateLaunchTemplateVersion/).twice
+      end
+    end
+
     context 'when old AMI does not exist' do
       let(:instance) { Capistrano::ASG::Rolling::Instance.new('i-12345', '192.168.1.88', '54.194.252.215', 'ami-67890', nil) }
 
