@@ -32,12 +32,12 @@ namespace :rolling do
     standard_groups = config.autoscale_groups.standard
     standard_groups.each do |group|
       group.instances.each_with_index do |instance, index|
-        if index.zero? && group.properties.key?(:primary_roles)
-          server_properties = group.properties.dup
-          server_properties[:roles] = server_properties.delete(:primary_roles)
-        else
-          server_properties = group.properties
-        end
+        server_properties =
+          if index.zero? && group.properties.key?(:primary_roles)
+            group.properties.merge(roles: group.properties[:primary_roles]).except(:primary_roles)
+          else
+            group.properties
+          end
 
         add_instance(instance, server_properties)
       end
