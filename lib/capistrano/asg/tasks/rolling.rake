@@ -4,30 +4,39 @@ namespace :rolling do
   desc 'Setup servers to be used for (rolling) deployment'
   task :setup do
     config.autoscale_groups.each do |group|
-      if group.rolling?
-        logger.info "Auto Scaling Group: **#{group.name}**, rolling deployment strategy."
+      strategy = group.rolling? ? 'rolling' : 'standard'
 
-        # If we've already launched an instance with this image, then skip it.
-        next unless config.instances.with_image(group.launch_template.image_id).empty?
+      logger.info "Auto Scaling Group: **#{group.name}**, #{strategy} deployment strategy."
+    end
 
-        instance = Capistrano::ASG::Rolling::Instance.run(autoscaling_group: group, overrides: config.instance_overrides)
+    rolling_groups = config.autoscale_groups.rolling
+    if rolling_groups.any?
+      launched_instances = Capistrano::ASG::Rolling::Parallel.run(rolling_groups.with_unique_images) do |group|
+        Capistrano::ASG::Rolling::Instance.run(
+          autoscaling_group: group,
+          overrides: config.instance_overrides
+        ).tap { |instance| config.instances << instance }
+      end
+
+      launched_instances.each do |instance|
         logger.info "Launched Instance: **#{instance.id}**"
-        config.instances << instance
 
+        group = instance.autoscale_group
         add_instance(instance, group.properties)
-      else
-        logger.info "Auto Scaling Group: **#{group.name}**, standard deployment strategy."
+      end
+    end
 
-        group.instances.each_with_index do |instance, index|
-          if index.zero? && group.properties.key?(:primary_roles)
-            server_properties = group.properties.dup
-            server_properties[:roles] = server_properties.delete(:primary_roles)
-          else
-            server_properties = group.properties
-          end
-
-          add_instance(instance, server_properties)
+    standard_groups = config.autoscale_groups.standard
+    standard_groups.each do |group|
+      group.instances.each_with_index do |instance, index|
+        if index.zero? && group.properties.key?(:primary_roles)
+          server_properties = group.properties.dup
+          server_properties[:roles] = server_properties.delete(:primary_roles)
+        else
+          server_properties = group.properties
         end
+
+        add_instance(instance, server_properties)
       end
     end
 

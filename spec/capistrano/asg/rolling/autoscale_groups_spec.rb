@@ -34,6 +34,82 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroups do
     end
   end
 
+  describe '#rolling' do
+    it 'returns an AutoscaleGroups object' do
+      expect(groups.rolling).to be_a(described_class)
+    end
+
+    context 'when all groups use the rolling strategy' do
+      it 'returns all groups' do
+        expect(groups.rolling.count).to eq(2)
+      end
+    end
+
+    context 'when one group uses the standard strategy' do
+      let(:group2) { Capistrano::ASG::Rolling::AutoscaleGroup.new('asg-jobs', rolling: false, user: 'deployer') }
+
+      it 'excludes standard groups' do
+        expect(groups.rolling.count).to eq(1)
+        expect(groups.rolling).to contain_exactly(group1)
+      end
+    end
+  end
+
+  describe '#standard' do
+    it 'returns an AutoscaleGroups object' do
+      expect(groups.standard).to be_a(described_class)
+    end
+
+    context 'when all groups use the rolling strategy' do
+      it 'returns no groups' do
+        expect(groups.standard.count).to eq(0)
+      end
+    end
+
+    context 'when one group uses the standard strategy' do
+      let(:group2) { Capistrano::ASG::Rolling::AutoscaleGroup.new('asg-jobs', rolling: false, user: 'deployer') }
+
+      it 'includes only the standard group' do
+        expect(groups.standard.count).to eq(1)
+        expect(groups.standard).to contain_exactly(group2)
+      end
+    end
+  end
+
+  describe '#with_unique_images' do
+    let(:launch_template1) { instance_double(Capistrano::ASG::Rolling::LaunchTemplate, image_id: 'ami-111') }
+    let(:launch_template2) { instance_double(Capistrano::ASG::Rolling::LaunchTemplate, image_id: 'ami-222') }
+
+    before do
+      allow(group1).to receive(:launch_template).and_return(launch_template1)
+      allow(group2).to receive(:launch_template).and_return(launch_template2)
+    end
+
+    it 'returns an AutoscaleGroups object' do
+      expect(groups.with_unique_images).to be_a(described_class)
+    end
+
+    context 'when all groups have unique images' do
+      it 'includes all groups' do
+        expect(groups.with_unique_images).to contain_exactly(group1, group2)
+      end
+    end
+
+    context 'when two groups share the same launch template image' do
+      before do
+        allow(group2).to receive(:launch_template).and_return(launch_template1)
+      end
+
+      it 'includes only the first group' do
+        expect(groups.with_unique_images).to contain_exactly(group1)
+      end
+
+      it 'returns one group' do
+        expect(groups.with_unique_images.count).to eq(1)
+      end
+    end
+  end
+
   describe '#launch_templates' do
     before do
       stub_request(:post, /amazonaws.com/)

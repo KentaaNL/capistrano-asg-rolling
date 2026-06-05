@@ -19,6 +19,18 @@ module Capistrano
           @groups.reject { |group| filtered?(group) }.each(&)
         end
 
+        def rolling
+          self.class.new(select(&:rolling?))
+        end
+
+        def standard
+          self.class.new(reject(&:rolling?))
+        end
+
+        def with_unique_images
+          self.class.new(uniq { |group| group.launch_template.image_id })
+        end
+
         def launch_templates
           templates = @groups.map(&:launch_template)
           LaunchTemplates.new(templates)

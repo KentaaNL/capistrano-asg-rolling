@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'concurrent/array'
+
 module Capistrano
   module ASG
     module Rolling
@@ -8,7 +10,7 @@ module Capistrano
         include Enumerable
 
         def initialize(instances = [])
-          @instances = instances
+          @instances = Concurrent::Array.new(instances)
         end
 
         def <<(instance)

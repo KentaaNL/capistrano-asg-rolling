@@ -44,7 +44,7 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
   end
 
   describe 'rolling:setup' do
-    let(:instance) { Capistrano::ASG::Rolling::Instance.new('i-12345', '10.0.0.1', nil, 'ami-existing', nil) }
+    let(:instance) { Capistrano::ASG::Rolling::Instance.new('i-12345', '10.0.0.1', nil, 'ami-existing', group) }
 
     before do
       allow(launch_template).to receive(:image_id).and_return('ami-existing')
@@ -55,7 +55,8 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
     context 'when group uses rolling strategy and no instance with that image is tracked' do
       before do
         allow(group).to receive(:launch_template).and_return(launch_template)
-        allow(Capistrano::ASG::Rolling::Configuration).to receive(:autoscale_groups).and_return([group])
+        allow(Capistrano::ASG::Rolling::Configuration).to receive(:autoscale_groups)
+          .and_return(Capistrano::ASG::Rolling::AutoscaleGroups.new([group]))
         allow(Capistrano::ASG::Rolling::Instance).to receive(:run).and_return(instance)
       end
 
@@ -77,27 +78,14 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
       end
     end
 
-    context 'when group uses rolling strategy but the image is already tracked' do
-      let(:existing_instance) { Capistrano::ASG::Rolling::Instance.new('i-existing', '10.0.0.2', nil, 'ami-existing', nil) }
-
-      before do
-        allow(group).to receive(:launch_template).and_return(launch_template)
-        allow(Capistrano::ASG::Rolling::Configuration).to receive(:autoscale_groups).and_return([group])
-        allow(Capistrano::ASG::Rolling::Instance).to receive(:run)
-        Capistrano::ASG::Rolling::Configuration.instances << existing_instance
-      end
-
-      it 'does not launch a new instance' do
-        run_task('rolling:setup')
-        expect(Capistrano::ASG::Rolling::Instance).not_to have_received(:run)
-      end
-    end
-
     context 'when instance_overrides is configured' do
       let(:overrides) { { instance_type: 'c5.large' } }
 
       before do
-        allow(Capistrano::ASG::Rolling::Configuration).to receive_messages(instance_overrides: overrides, autoscale_groups: [group])
+        allow(Capistrano::ASG::Rolling::Configuration).to receive_messages(
+          instance_overrides: overrides,
+          autoscale_groups: Capistrano::ASG::Rolling::AutoscaleGroups.new([group])
+        )
         allow(group).to receive(:launch_template).and_return(launch_template)
         allow(Capistrano::ASG::Rolling::Instance).to receive(:run).and_return(instance)
       end
@@ -109,12 +97,59 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
       end
     end
 
+    context 'when multiple rolling groups each need an instance' do
+      let(:group2) { Capistrano::ASG::Rolling::AutoscaleGroup.new('asg-worker', roles: [:worker], user: 'deployer') }
+      let(:launch_template2) { Capistrano::ASG::Rolling::LaunchTemplate.new('lt-0987654321', 1, 'WorkerTemplate') }
+      let(:instance2) { Capistrano::ASG::Rolling::Instance.new('i-67890', '10.0.0.2', nil, 'ami-other', group2) }
+
+      before do
+        allow(group).to receive(:launch_template).and_return(launch_template)
+        allow(group2).to receive(:launch_template).and_return(launch_template2)
+        allow(launch_template2).to receive(:image_id).and_return('ami-other')
+        allow(Capistrano::ASG::Rolling::Configuration).to receive(:autoscale_groups)
+          .and_return(Capistrano::ASG::Rolling::AutoscaleGroups.new([group, group2]))
+        allow(Capistrano::ASG::Rolling::Instance).to receive(:run)
+          .with(autoscaling_group: group, overrides: nil).and_return(instance)
+        allow(Capistrano::ASG::Rolling::Instance).to receive(:run)
+          .with(autoscaling_group: group2, overrides: nil).and_return(instance2)
+      end
+
+      it 'launches an instance for each group' do
+        run_task('rolling:setup')
+        expect(Capistrano::ASG::Rolling::Instance).to have_received(:run).twice
+      end
+
+      it 'adds both instances to the server list' do
+        run_task('rolling:setup')
+        expect(plugin).to have_received(:server).with('10.0.0.1', hash_including(roles: [:web]))
+        expect(plugin).to have_received(:server).with('10.0.0.2', hash_including(roles: [:worker]))
+      end
+    end
+
+    context 'when two rolling groups share the same launch template image' do
+      let(:group2) { Capistrano::ASG::Rolling::AutoscaleGroup.new('asg-worker', roles: [:worker], user: 'deployer') }
+
+      before do
+        allow(group).to receive(:launch_template).and_return(launch_template)
+        allow(group2).to receive(:launch_template).and_return(launch_template)
+        allow(Capistrano::ASG::Rolling::Configuration).to receive(:autoscale_groups)
+          .and_return(Capistrano::ASG::Rolling::AutoscaleGroups.new([group, group2]))
+        allow(Capistrano::ASG::Rolling::Instance).to receive(:run).and_return(instance)
+      end
+
+      it 'only launches one instance' do
+        run_task('rolling:setup')
+        expect(Capistrano::ASG::Rolling::Instance).to have_received(:run).once
+      end
+    end
+
     context 'when group uses standard (non-rolling) strategy' do
       let(:group) { Capistrano::ASG::Rolling::AutoscaleGroup.new('asg-web', rolling: false, roles: [:web], user: 'deployer') }
 
       before do
         allow(group).to receive(:instances).and_return([instance])
-        allow(Capistrano::ASG::Rolling::Configuration).to receive(:autoscale_groups).and_return([group])
+        allow(Capistrano::ASG::Rolling::Configuration).to receive(:autoscale_groups)
+          .and_return(Capistrano::ASG::Rolling::AutoscaleGroups.new([group]))
       end
 
       it 'adds existing instances to the server list' do
@@ -134,7 +169,8 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
 
       before do
         allow(group).to receive(:instances).and_return([instance, instance2])
-        allow(Capistrano::ASG::Rolling::Configuration).to receive(:autoscale_groups).and_return([group])
+        allow(Capistrano::ASG::Rolling::Configuration).to receive(:autoscale_groups)
+          .and_return(Capistrano::ASG::Rolling::AutoscaleGroups.new([group]))
       end
 
       it 'uses primary_roles as the roles for the first instance' do
@@ -158,7 +194,8 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
 
     context 'when no groups are configured' do
       before do
-        allow(Capistrano::ASG::Rolling::Configuration).to receive(:autoscale_groups).and_return([])
+        allow(Capistrano::ASG::Rolling::Configuration).to receive(:autoscale_groups)
+          .and_return(Capistrano::ASG::Rolling::AutoscaleGroups.new)
       end
 
       it 'does not wait for SSH availability' do

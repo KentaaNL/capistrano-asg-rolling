@@ -12,6 +12,27 @@ RSpec.describe Capistrano::ASG::Rolling::Instances do
     instances << instance2
   end
 
+  describe '#<<' do
+    let(:instance3) { Capistrano::ASG::Rolling::Instance.new('i-3', nil, nil, nil, nil) }
+    let(:instance4) { Capistrano::ASG::Rolling::Instance.new('i-4', nil, nil, nil, nil) }
+
+    it 'adds an instance to the array' do
+      collection = described_class.new
+      collection << instance1
+      expect(collection.count).to eq(1)
+    end
+
+    it 'is thread-safe under concurrent appends' do
+      collection = described_class.new
+
+      Capistrano::ASG::Rolling::Parallel.run([instance3, instance4]) do |instance|
+        collection << instance
+      end
+
+      expect(collection.count).to eq(2)
+    end
+  end
+
   describe '#each' do
     it 'returns an Enumerator' do
       expect(instances.each).to be_a(Enumerator)

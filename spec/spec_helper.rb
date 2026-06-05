@@ -28,9 +28,9 @@ RSpec.configure do |config|
 
   # Reset configuration to the default state before running each spec.
   config.before do
-    Capistrano::ASG::Rolling::Configuration.instance_variable_set(:@autoscale_groups, nil)
-    Capistrano::ASG::Rolling::Configuration.instance_variable_set(:@instances, nil)
-    Capistrano::ASG::Rolling::Configuration.instance_variable_set(:@launch_templates, nil)
+    Capistrano::ASG::Rolling::Configuration.instance_variable_set(:@autoscale_groups, Capistrano::ASG::Rolling::AutoscaleGroups.new)
+    Capistrano::ASG::Rolling::Configuration.instance_variable_set(:@instances, Capistrano::ASG::Rolling::Instances.new)
+    Capistrano::ASG::Rolling::Configuration.instance_variable_set(:@launch_templates, Capistrano::ASG::Rolling::LaunchTemplates.new)
 
     Capistrano::ASG::Rolling::Configuration.set(:asg_rolling_ami_tags, nil)
     Capistrano::ASG::Rolling::Configuration.set(:asg_rolling_group_name, nil)

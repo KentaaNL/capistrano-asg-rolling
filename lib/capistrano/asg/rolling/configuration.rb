@@ -3,25 +3,32 @@
 module Capistrano
   module ASG
     module Rolling
-      # Singleton that holds the configuration.
+      # Singleton that holds the configuration and global state of the plugin.
+      # State is eagerly initialized so accessors are lock-free.
       module Configuration
         extend Capistrano::DSL
 
-        module_function
-
         # Registered Auto Scaling Groups.
-        def autoscale_groups
-          @autoscale_groups ||= AutoscaleGroups.new
-        end
+        @autoscale_groups = AutoscaleGroups.new
 
         # Launched Instances.
-        def instances
-          @instances ||= Instances.new
-        end
+        @instances = Instances.new
 
         # Updated Launch Templates.
+        @launch_templates = LaunchTemplates.new
+
+        module_function
+
+        def autoscale_groups
+          @autoscale_groups
+        end
+
+        def instances
+          @instances
+        end
+
         def launch_templates
-          @launch_templates ||= LaunchTemplates.new
+          @launch_templates
         end
 
         def aws_access_key_id
