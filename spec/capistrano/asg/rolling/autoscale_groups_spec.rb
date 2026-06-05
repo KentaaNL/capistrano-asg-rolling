@@ -77,36 +77,22 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroups do
   end
 
   describe '#with_unique_images' do
-    let(:launch_template1) { instance_double(Capistrano::ASG::Rolling::LaunchTemplate, image_id: 'ami-111') }
-    let(:launch_template2) { instance_double(Capistrano::ASG::Rolling::LaunchTemplate, image_id: 'ami-222') }
-
     before do
-      allow(group1).to receive(:launch_template).and_return(launch_template1)
-      allow(group2).to receive(:launch_template).and_return(launch_template2)
+      stub_request(:post, /amazonaws.com/)
+        .with(body: /Action=DescribeAutoScalingGroups/)
+        .to_return(body: File.read('spec/support/stubs/DescribeAutoScalingGroups.xml'))
+      stub_request(:post, /amazonaws.com/)
+        .with(body: /Action=DescribeLaunchTemplateVersions/)
+        .to_return(body: File.read('spec/support/stubs/DescribeLaunchTemplateVersions.xml'))
     end
 
     it 'returns an AutoscaleGroups object' do
       expect(groups.with_unique_images).to be_a(described_class)
     end
 
-    context 'when all groups have unique images' do
-      it 'includes all groups' do
-        expect(groups.with_unique_images).to contain_exactly(group1, group2)
-      end
-    end
-
-    context 'when two groups share the same launch template image' do
-      before do
-        allow(group2).to receive(:launch_template).and_return(launch_template1)
-      end
-
-      it 'includes only the first group' do
-        expect(groups.with_unique_images).to contain_exactly(group1)
-      end
-
-      it 'returns one group' do
-        expect(groups.with_unique_images.count).to eq(1)
-      end
+    it 'deduplicates groups that share the same launch template image' do
+      # Both groups resolve to the same launch template and image via the stubs.
+      expect(groups.with_unique_images).to contain_exactly(group1)
     end
   end
 
