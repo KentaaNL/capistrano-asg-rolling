@@ -2,7 +2,10 @@
 
 namespace :rolling do
   desc 'Setup servers to be used for (rolling) deployment'
-  task :setup do
+  task setup: %w[rolling:prepare rolling:wait_for_ssh]
+
+  desc 'Resolve Auto Scaling Groups, launch rolling instances, and register all servers'
+  task :prepare do
     config.autoscale_groups.each do |group|
       strategy = group.rolling? ? 'rolling' : 'standard'
 
@@ -39,7 +42,10 @@ namespace :rolling do
         add_instance(instance, server_properties)
       end
     end
+  end
 
+  desc 'Wait for SSH to become available on launched instances'
+  task :wait_for_ssh do
     unless config.instances.empty?
       logger.info 'Waiting for SSH to be available...'
 

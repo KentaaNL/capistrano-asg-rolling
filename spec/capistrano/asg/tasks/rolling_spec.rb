@@ -43,13 +43,12 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
     Rake::Task[name].execute
   end
 
-  describe 'rolling:setup' do
+  describe 'rolling:prepare' do
     let(:instance) { Capistrano::ASG::Rolling::Instance.new('i-12345', '10.0.0.1', nil, 'ami-existing', group) }
 
     before do
       allow(launch_template).to receive(:image_id).and_return('ami-existing')
       allow(Capistrano::ASG::Rolling::Configuration).to receive(:instance_overrides).and_return(nil)
-      allow(Capistrano::ASG::Rolling::SSH).to receive(:wait_for_availability)
     end
 
     context 'when group uses rolling strategy and no instance with that image is tracked' do
@@ -61,20 +60,14 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
       end
 
       it 'launches a new instance' do
-        run_task('rolling:setup')
+        run_task('rolling:prepare')
         expect(Capistrano::ASG::Rolling::Instance).to have_received(:run)
           .with(autoscaling_group: group, overrides: nil)
       end
 
       it 'adds the new instance to the server list' do
-        run_task('rolling:setup')
+        run_task('rolling:prepare')
         expect(plugin).to have_received(:server).with('10.0.0.1', hash_including(roles: [:web]))
-      end
-
-      it 'waits for SSH availability' do
-        allow(plugin).to receive(:on).and_yield
-        run_task('rolling:setup')
-        expect(Capistrano::ASG::Rolling::SSH).to have_received(:wait_for_availability)
       end
     end
 
@@ -91,7 +84,7 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
       end
 
       it 'passes instance_overrides to the run call' do
-        run_task('rolling:setup')
+        run_task('rolling:prepare')
         expect(Capistrano::ASG::Rolling::Instance).to have_received(:run)
           .with(autoscaling_group: group, overrides: overrides)
       end
@@ -115,12 +108,12 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
       end
 
       it 'launches an instance for each group' do
-        run_task('rolling:setup')
+        run_task('rolling:prepare')
         expect(Capistrano::ASG::Rolling::Instance).to have_received(:run).twice
       end
 
       it 'adds both instances to the server list' do
-        run_task('rolling:setup')
+        run_task('rolling:prepare')
         expect(plugin).to have_received(:server).with('10.0.0.1', hash_including(roles: [:web]))
         expect(plugin).to have_received(:server).with('10.0.0.2', hash_including(roles: [:worker]))
       end
@@ -138,7 +131,7 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
       end
 
       it 'only launches one instance' do
-        run_task('rolling:setup')
+        run_task('rolling:prepare')
         expect(Capistrano::ASG::Rolling::Instance).to have_received(:run).once
       end
     end
@@ -153,13 +146,8 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
       end
 
       it 'adds existing instances to the server list' do
-        run_task('rolling:setup')
+        run_task('rolling:prepare')
         expect(plugin).to have_received(:server).with('10.0.0.1', hash_including(roles: [:web]))
-      end
-
-      it 'does not wait for SSH availability' do
-        run_task('rolling:setup')
-        expect(plugin).not_to have_received(:on)
       end
     end
 
@@ -174,19 +162,19 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
       end
 
       it 'uses primary_roles as the roles for the first instance' do
-        run_task('rolling:setup')
+        run_task('rolling:prepare')
         expect(plugin).to have_received(:server)
           .with('10.0.0.1', hash_including(roles: %i[web db]))
       end
 
       it 'does not pass the primary_roles key in the first server call' do
-        run_task('rolling:setup')
+        run_task('rolling:prepare')
         expect(plugin).not_to have_received(:server)
           .with('10.0.0.1', hash_including(primary_roles: anything))
       end
 
       it 'uses standard roles for subsequent instances' do
-        run_task('rolling:setup')
+        run_task('rolling:prepare')
         expect(plugin).to have_received(:server)
           .with('10.0.0.3', hash_including(roles: [:web]))
       end
@@ -199,7 +187,32 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
       end
 
       it 'does not wait for SSH availability' do
-        run_task('rolling:setup')
+        run_task('rolling:prepare')
+        expect(plugin).not_to have_received(:on)
+      end
+    end
+  end
+
+  describe 'rolling:wait_for_ssh' do
+    before do
+      allow(Capistrano::ASG::Rolling::SSH).to receive(:wait_for_availability)
+    end
+
+    context 'when instances have been launched' do
+      before do
+        Capistrano::ASG::Rolling::Configuration.instances << Capistrano::ASG::Rolling::Instance.new('i-12345', '10.0.0.1', nil, nil, nil)
+        allow(plugin).to receive(:on).and_yield
+      end
+
+      it 'waits for SSH availability' do
+        run_task('rolling:wait_for_ssh')
+        expect(Capistrano::ASG::Rolling::SSH).to have_received(:wait_for_availability)
+      end
+    end
+
+    context 'when no instances have been launched' do
+      it 'does not wait for SSH availability' do
+        run_task('rolling:wait_for_ssh')
         expect(plugin).not_to have_received(:on)
       end
     end
