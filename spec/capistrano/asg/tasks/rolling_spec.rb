@@ -357,7 +357,7 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
 
       it 'logs the failure' do
         run_task('rolling:trigger_instance_refresh')
-        expect(logger).to have_received(:info).with(match(/Failed to start Instance Refresh/))
+        expect(logger).to have_received(:warning).with(/Failed to start Instance Refresh/)
       end
     end
 
@@ -437,7 +437,7 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
 
       it 'logs a warning' do
         run_task('rolling:cleanup')
-        expect(logger).to have_received(:warning).with(match(/does not exist/))
+        expect(logger).to have_received(:warning).with(/does not exist/)
       end
 
       it 'does not delete the launch template version' do
@@ -572,7 +572,7 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
 
       it 'logs a warning' do
         run_task('rolling:cleanup')
-        expect(logger).to have_received(:warning).with(match(/Failed to terminate/))
+        expect(logger).to have_received(:warning).with(/Failed to terminate/)
       end
     end
   end
@@ -727,7 +727,7 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
 
       it 'logs an error' do
         run_task('rolling:create_ami')
-        expect(logger).to have_received(:error).with(match(/Unable to create AMI/))
+        expect(logger).to have_received(:error).with(/Unable to create AMI/)
       end
 
       it 'does not enter standby' do
@@ -841,7 +841,7 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
 
       it 'logs a warning about the error' do
         run_task('rolling:instance_refresh_status')
-        expect(logger).to have_received(:warning).with(match(/failed to fetch status/))
+        expect(logger).to have_received(:warning).with(/failed to fetch status/)
       end
     end
   end
