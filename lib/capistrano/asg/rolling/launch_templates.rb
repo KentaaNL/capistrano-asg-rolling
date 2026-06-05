@@ -29,16 +29,20 @@ module Capistrano
           @templates.empty?
         end
 
+        # For each AMI, find templates still pointing at the old image it was built
+        # from, then create new template versions referencing the new AMI in parallel.
+        #
+        # Returns `LaunchTemplates` containing only the newly created versions.
         def update(amis:, description: nil)
-          updated_templates = []
-
-          amis.each do |ami|
+          template_image_pairs = amis.flat_map do |ami|
             old_image_id = ami.instance.image_id
             new_image_id = ami.id
 
-            with_image(old_image_id).each do |template|
-              updated_templates << template.create_version(image_id: new_image_id, description: description)
-            end
+            with_image(old_image_id).map { |template| [template, new_image_id] }
+          end
+
+          updated_templates = Parallel.run(template_image_pairs) do |template, new_image_id|
+            template.create_version(image_id: new_image_id, description: description)
           end
 
           self.class.new(updated_templates)
