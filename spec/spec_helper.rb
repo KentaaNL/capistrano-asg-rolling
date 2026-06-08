@@ -47,4 +47,8 @@ RSpec.configure do |config|
     Capistrano::ASG::Rolling::Configuration.set(:current_revision, 'abcd1234')
     Capistrano::ASG::Rolling::Configuration.set(:release_timestamp, '20241004124200')
   end
+
+  config.after do
+    Capistrano::ASG::Rolling::Configuration.instance_variable_set(:@instances, Capistrano::ASG::Rolling::Instances.new)
+  end
 end
