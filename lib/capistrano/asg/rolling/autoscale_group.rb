@@ -21,12 +21,6 @@ module Capistrano
           @name = name
           @properties = properties
 
-          if properties[:healthy_percentage]
-            properties[:min_healthy_percentage] = properties.delete(:healthy_percentage)
-
-            Kernel.warn('WARNING: the property `healthy_percentage` is deprecated and will be removed in a future release. Please update to `min_healthy_percentage`.')
-          end
-
           validate_properties!
         end
 
