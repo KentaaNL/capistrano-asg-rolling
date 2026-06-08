@@ -51,10 +51,6 @@ module Capistrano
           fetch(:asg_rolling_group_name)
         end
 
-        def ssh_options
-          fetch(:asg_rolling_ssh_options, fetch(:ssh_options))
-        end
-
         def instance_overrides
           fetch(:asg_rolling_instance_overrides)
         end
