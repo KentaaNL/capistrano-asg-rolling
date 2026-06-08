@@ -218,6 +218,23 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
       expect(WebMock).to have_requested(:post, /amazonaws.com/)
         .with(body: /Action=EnterStandby&AutoScalingGroupName=test-asg&InstanceIds.member.1=i-12345678&ShouldDecrementDesiredCapacity=true/).once
     end
+
+    context 'when the instance is not immediately in standby' do
+      before do
+        stub_request(:post, /amazonaws.com/)
+          .with(body: /Action=DescribeAutoScalingInstances/)
+          .to_return(
+            { body: File.read('spec/support/stubs/DescribeAutoScalingInstances.InService.xml') },
+            { body: File.read('spec/support/stubs/DescribeAutoScalingInstances.Standby.xml') }
+          )
+      end
+
+      it 'polls until the instance reaches standby state' do
+        group.enter_standby(instance)
+        expect(WebMock).to have_requested(:post, /amazonaws.com/)
+          .with(body: /Action=DescribeAutoScalingInstances/).twice
+      end
+    end
   end
 
   describe '#exit_standby' do
