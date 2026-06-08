@@ -43,6 +43,16 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
     Rake::Task[name].execute
   end
 
+  describe 'rolling:setup' do
+    it 'invokes rolling:prepare' do
+      expect(Rake::Task['rolling:setup'].prerequisites).to include('rolling:prepare')
+    end
+
+    it 'invokes rolling:wait_for_ssh' do
+      expect(Rake::Task['rolling:setup'].prerequisites).to include('rolling:wait_for_ssh')
+    end
+  end
+
   describe 'rolling:prepare' do
     let(:instance) { Capistrano::ASG::Rolling::Instance.new('i-12345', '10.0.0.1', nil, 'ami-existing', group) }
 
