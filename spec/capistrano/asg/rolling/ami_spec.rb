@@ -210,5 +210,10 @@ RSpec.describe Capistrano::ASG::Rolling::AMI do
       expect(ami).not_to eql(ami3)
       expect(ami).not_to eq(ami3)
     end
+
+    it 'can be used in Sets without duplicates' do
+      set = Set[ami, ami2, ami3]
+      expect(set.count).to eq(2)
+    end
   end
 end
