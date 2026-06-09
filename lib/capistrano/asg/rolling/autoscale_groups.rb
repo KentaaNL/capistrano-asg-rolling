@@ -19,6 +19,10 @@ module Capistrano
           @groups.reject { |group| filtered?(group) }.each(&)
         end
 
+        def empty?
+          @groups.empty?
+        end
+
         def rolling
           self.class.new(select(&:rolling?))
         end

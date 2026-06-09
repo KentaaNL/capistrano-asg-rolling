@@ -34,6 +34,21 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroups do
     end
   end
 
+  describe '#empty?' do
+    context 'when collection is not empty' do
+      it 'returns false' do
+        expect(groups).not_to be_empty
+      end
+    end
+
+    context 'when collection is empty' do
+      it 'returns true' do
+        empty_groups = described_class.new
+        expect(empty_groups).to be_empty
+      end
+    end
+  end
+
   describe '#rolling' do
     it 'returns an AutoscaleGroups object' do
       expect(groups.rolling).to be_a(described_class)
