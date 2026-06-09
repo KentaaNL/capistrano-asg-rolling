@@ -9,6 +9,12 @@ require 'capistrano/deploy'
 RSpec.describe Capistrano::ASG::Rolling::Plugin do
   include Capistrano::DSL
 
+  before do
+    Rake::Task.define_task(:production)
+
+    allow(Capistrano::DSL).to receive(:stages).and_return([:production])
+  end
+
   it 'defines tasks when constructed #1' do
     install_plugin described_class
 
