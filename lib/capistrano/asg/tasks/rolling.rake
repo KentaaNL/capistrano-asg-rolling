@@ -6,14 +6,12 @@ namespace :rolling do
 
   desc 'Resolve Auto Scaling Groups, launch rolling instances, and register all servers'
   task :prepare do
-    config.autoscale_groups.each do |group|
-      strategy = group.rolling? ? 'rolling' : 'standard'
-
-      logger.info "Auto Scaling Group: **#{group.name}**, #{strategy} deployment strategy."
-    end
-
     rolling_groups = config.autoscale_groups.rolling
     if rolling_groups.any?
+      rolling_groups.each do |group|
+        logger.info "Auto Scaling Group: **#{group.name}**, rolling deployment strategy."
+      end
+
       launched_instances = Capistrano::ASG::Rolling::Parallel.run(rolling_groups.with_unique_images) do |group|
         Capistrano::ASG::Rolling::Instance.run(
           autoscaling_group: group,
@@ -31,6 +29,8 @@ namespace :rolling do
 
     standard_groups = config.autoscale_groups.standard
     standard_groups.each do |group|
+      logger.info "Auto Scaling Group: **#{group.name}**, standard deployment strategy."
+
       group.instances.each_with_index do |instance, index|
         server_properties =
           if index.zero? && group.properties.key?(:primary_roles)
