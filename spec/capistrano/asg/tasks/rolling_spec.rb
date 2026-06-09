@@ -671,6 +671,7 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
   describe 'rolling:create_ami' do
     let(:instance) { Capistrano::ASG::Rolling::Instance.new('i-12345', nil, nil, nil, nil) }
     let(:ami) { Capistrano::ASG::Rolling::AMI.new('ami-new') }
+    let(:new_template) { Capistrano::ASG::Rolling::LaunchTemplate.new('lt-1234567890', 2, 'MyLaunchTemplate') }
     let(:launch_templates) { instance_double(Capistrano::ASG::Rolling::LaunchTemplates) }
 
     before do
@@ -687,7 +688,7 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
         allow(instance).to receive(:stop)
         allow(instance).to receive(:start)
         allow(instance).to receive(:create_ami).and_return(ami)
-        allow(launch_template).to receive(:create_version).and_return(launch_template)
+        allow(launch_template).to receive(:create_version).and_return(new_template)
         allow(launch_templates).to receive(:<<)
       end
 
@@ -723,9 +724,10 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
           .with(image_id: 'ami-new', description: 'deploy by deployer')
       end
 
-      it 'adds the launch template to tracked templates' do
+      it 'adds the new template version to tracked templates, not the old one' do
         run_task('rolling:create_ami')
-        expect(launch_templates).to have_received(:<<).with(launch_template)
+        expect(launch_templates).to have_received(:<<).with(equal(new_template))
+        expect(launch_templates).not_to have_received(:<<).with(equal(launch_template))
       end
     end
 

@@ -191,9 +191,9 @@ namespace :rolling do
 
         logger.info 'Updating Launch Template with the new AMI...'
         launch_template = group.launch_template
-        launch_template.create_version(image_id: ami.id, description: revision_log_message)
+        new_template = launch_template.create_version(image_id: ami.id, description: revision_log_message)
 
-        config.launch_templates << launch_template
+        config.launch_templates << new_template
       else
         logger.error 'Unable to create AMI. No instance with a valid state was found in the Auto Scaling Group.'
       end
