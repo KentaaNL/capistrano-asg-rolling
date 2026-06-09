@@ -400,7 +400,7 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
 
     before do
       allow(Capistrano::ASG::Rolling::Configuration).to receive_messages(launch_templates: launch_templates, instances: instances, keep_versions: 0)
-      allow(instances).to receive(:auto_terminate).and_return(auto_terminate_instances)
+      allow(instances).to receive(:auto_terminatable).and_return(auto_terminate_instances)
       allow(auto_terminate_instances).to receive(:any?).and_return(false)
       allow(launch_templates).to receive(:empty?).and_return(false)
       allow(launch_templates).to receive(:each).and_yield(launch_template)

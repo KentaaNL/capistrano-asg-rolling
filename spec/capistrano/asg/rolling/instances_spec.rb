@@ -54,21 +54,21 @@ RSpec.describe Capistrano::ASG::Rolling::Instances do
     end
   end
 
-  describe '#auto_terminate' do
+  describe '#auto_terminatable' do
     it 'returns an Instances object' do
-      expect(instances.auto_terminate).to be_a(described_class)
+      expect(instances.auto_terminatable).to be_a(described_class)
     end
 
     it 'returns an empty set when no instances marked to auto terminate' do
       instance1.auto_terminate = false
       instance2.auto_terminate = false
-      expect(instances.auto_terminate.count).to eq(0)
+      expect(instances.auto_terminatable.count).to eq(0)
     end
 
     it 'returns instances that are marked marked to auto terminate' do
       instance1.auto_terminate = false
-      expect(instances.auto_terminate.count).to eq(1)
-      expect(instances.auto_terminate).to include(instance2)
+      expect(instances.auto_terminatable.count).to eq(1)
+      expect(instances.auto_terminatable).to contain_exactly(instance2)
     end
   end
 

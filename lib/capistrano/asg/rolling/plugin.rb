@@ -60,7 +60,7 @@ module Capistrano
 
         # Make sure any instances that were launched for rolling updates are terminated.
         def cleanup
-          instances = config.instances.auto_terminate
+          instances = config.instances.auto_terminatable
           return if instances.empty?
 
           logger.info 'Terminating instance(s)...'

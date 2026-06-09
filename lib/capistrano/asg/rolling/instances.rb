@@ -25,7 +25,7 @@ module Capistrano
           instances.empty?
         end
 
-        def auto_terminate
+        def auto_terminatable
           self.class.new(select(&:auto_terminate?))
         end
 

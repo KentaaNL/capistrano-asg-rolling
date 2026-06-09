@@ -118,7 +118,7 @@ namespace :rolling do
       end
     end
 
-    instances = config.instances.auto_terminate
+    instances = config.instances.auto_terminatable
     if instances.any?
       logger.info 'Terminating instance(s)...'
       begin
