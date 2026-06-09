@@ -31,6 +31,13 @@ module Capistrano
           @launch_templates
         end
 
+        # Resets all mutable state.
+        def reset!
+          @autoscale_groups = AutoscaleGroups.new
+          @instances        = Instances.new
+          @launch_templates = LaunchTemplates.new
+        end
+
         def aws_access_key_id
           fetch(:aws_access_key_id)
         end

@@ -15,6 +15,10 @@ RSpec.describe Capistrano::ASG::Rolling::Plugin do
     allow(Capistrano::DSL).to receive(:stages).and_return([:production])
   end
 
+  after do
+    Capistrano::ASG::Rolling::Configuration.reset!
+  end
+
   it 'defines tasks when constructed #1' do
     install_plugin described_class
 
