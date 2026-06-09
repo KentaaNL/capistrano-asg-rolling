@@ -762,6 +762,7 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
 
     before do
       allow(plugin).to receive(:sleep)
+      allow(group).to receive(:refresh_id).and_return('refresh-123')
       allow(Capistrano::ASG::Rolling::Configuration).to receive_messages(
         instance_refresh_polling_interval: 1,
         wait_for_instance_refresh?: true,
@@ -797,9 +798,7 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
 
     context 'when refresh returns nil (no previous refresh)' do
       before do
-        # First call (polling loop): nil → treated as done.
-        # Second call (failed? check at the end): completed_status → not failed.
-        allow(group).to receive(:latest_instance_refresh).and_return(nil, completed_status)
+        allow(group).to receive(:latest_instance_refresh).and_return(nil)
       end
 
       it 'completes without error' do

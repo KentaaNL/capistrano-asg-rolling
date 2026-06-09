@@ -83,17 +83,6 @@ namespace :rolling do
     end
   end
 
-  desc 'Trigger instance refresh of deployed Auto Scaling Groups'
-  task :trigger_instance_refresh do
-    logger.info 'Triggering Instance Refresh on Auto Scaling Group(s)...'
-    config.autoscale_groups.each do |group|
-      group.start_instance_refresh(group.launch_template)
-      logger.info "Successfully started Instance Refresh on Auto Scaling Group **#{group.name}**."
-    rescue Capistrano::ASG::Rolling::StartInstanceRefreshError => e
-      logger.warning "Failed to start Instance Refresh on Auto Scaling Group **#{group.name}**: #{e.message}"
-    end
-  end
-
   desc 'Clean up old Launch Template versions and AMIs and terminate instances'
   task :cleanup do
     unless config.launch_templates.empty?
@@ -200,19 +189,33 @@ namespace :rolling do
     end
   end
 
+  desc 'Trigger instance refresh on all Auto Scaling Groups'
+  task :trigger_instance_refresh do
+    logger.info 'Triggering Instance Refresh on Auto Scaling Group(s)...'
+    config.autoscale_groups.each do |group|
+      group.start_instance_refresh(group.launch_template)
+
+      logger.info "Successfully started Instance Refresh on Auto Scaling Group **#{group.name}**."
+    rescue Capistrano::ASG::Rolling::StartInstanceRefreshError => e
+      logger.warning "Failed to start Instance Refresh on Auto Scaling Group **#{group.name}**: #{e.message}"
+    end
+  end
+
   desc 'Get status of instance refresh'
   task :instance_refresh_status do
     if config.wait_for_instance_refresh?
-      groups = config.autoscale_groups.to_h { |group| [group.name, group] }
-      completed_groups = []
+      groups = config.autoscale_groups.select(&:refresh_id).to_h { |group| [group.name, group] }
+      completed_refreshes = []
 
       while groups.any?
         groups.each do |name, group|
           refresh = group.latest_instance_refresh
           if refresh.nil? || refresh.completed?
             logger.info "Auto Scaling Group: **#{name}**, completed with status '#{refresh.status}'." if refresh&.completed?
-            completed_groups.push groups.delete(name)
-          elsif !refresh.percentage_complete.nil?
+
+            groups.delete(name)
+            completed_refreshes.push(refresh) if refresh
+          elsif refresh.percentage_complete
             logger.info "Auto Scaling Group: **#{name}**, #{refresh.percentage_complete}% completed, status '#{refresh.status}'."
           else
             logger.info "Auto Scaling Group: **#{name}**, status '#{refresh.status}'."
@@ -231,7 +234,7 @@ namespace :rolling do
         sleep wait_for
       end
 
-      failed = completed_groups.any? { |group| group.latest_instance_refresh&.failed? }
+      failed = completed_refreshes.any?(&:failed?)
       raise Capistrano::ASG::Rolling::InstanceRefreshFailed if failed
     end
   end

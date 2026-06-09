@@ -28,6 +28,7 @@ module Capistrano
 
           after 'rolling:update', 'rolling:cleanup'
           after 'rolling:create_ami', 'rolling:cleanup'
+
           after 'rolling:update', 'rolling:instance_refresh_status'
           after 'rolling:trigger_instance_refresh', 'rolling:instance_refresh_status'
 
