@@ -20,7 +20,7 @@ module Capistrano
         end
 
         def empty?
-          @groups.empty?
+          none?
         end
 
         def rolling
@@ -36,7 +36,7 @@ module Capistrano
         end
 
         def launch_templates
-          templates = @groups.map(&:launch_template)
+          templates = map(&:launch_template)
           LaunchTemplates.new(templates)
         end
 

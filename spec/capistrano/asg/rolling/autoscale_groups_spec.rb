@@ -47,6 +47,16 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroups do
         expect(empty_groups).to be_empty
       end
     end
+
+    context 'with filter that excludes all groups' do
+      before do
+        Capistrano::ASG::Rolling::Configuration.set(:asg_rolling_group_name, 'asg-other')
+      end
+
+      it 'returns true' do
+        expect(groups).to be_empty
+      end
+    end
   end
 
   describe '#rolling' do
@@ -114,7 +124,11 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroups do
   describe '#launch_templates' do
     before do
       stub_request(:post, /amazonaws.com/)
-        .with(body: /Action=DescribeAutoScalingGroups/).to_return(body: File.read('spec/support/stubs/DescribeAutoScalingGroups.xml'))
+        .with(body: /Action=DescribeAutoScalingGroups.*asg-web/)
+        .to_return(body: File.read('spec/support/stubs/DescribeAutoScalingGroups.xml'))
+      stub_request(:post, /amazonaws.com/)
+        .with(body: /Action=DescribeAutoScalingGroups.*asg-jobs/)
+        .to_return(body: File.read('spec/support/stubs/DescribeAutoScalingGroups.AsgJobs.xml'))
     end
 
     it 'returns a LaunchTemplates object' do
@@ -124,7 +138,18 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroups do
     it 'includes the launch templates from all ASGs' do
       template1 = group1.launch_template
       template2 = group2.launch_template
-      expect(groups.launch_templates).to include(template1, template2)
+      expect(groups.launch_templates).to contain_exactly(template1, template2)
+    end
+
+    context 'with filter' do
+      before do
+        Capistrano::ASG::Rolling::Configuration.set(:asg_rolling_group_name, 'asg-web')
+      end
+
+      it 'only includes the launch template of the matching ASG' do
+        template1 = group1.launch_template
+        expect(groups.launch_templates).to contain_exactly(template1)
+      end
     end
   end
 

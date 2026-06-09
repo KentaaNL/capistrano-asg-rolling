@@ -1,0 +1,53 @@
+<DescribeAutoScalingGroupsResponse xmlns="http://autoscaling.amazonaws.com/doc/2011-01-01/">
+  <DescribeAutoScalingGroupsResult>
+    <AutoScalingGroups>
+      <member>
+        <HealthCheckType>ELB</HealthCheckType>
+        <LoadBalancerNames>
+          <member>my-loadbalancer</member>
+        </LoadBalancerNames>
+        <Instances>
+          <member>
+            <LaunchTemplate>
+              <LaunchTemplateId>lt-1b30d076172g75bcd</LaunchTemplateId>
+              <LaunchTemplateName>JobsLaunchTemplate</LaunchTemplateName>
+              <Version>1</Version>
+            </LaunchTemplate>
+            <LifecycleState>InService</LifecycleState>
+            <InstanceId>i-87654321</InstanceId>
+            <ProtectedFromScaleIn>false</ProtectedFromScaleIn>
+            <AvailabilityZone>us-east-1c</AvailabilityZone>
+          </member>
+        </Instances>
+        <TerminationPolicies>
+          <member>Default</member>
+        </TerminationPolicies>
+        <DefaultCooldown>300</DefaultCooldown>
+        <AutoScalingGroupARN>arn:aws:autoscaling:us-east-1:123456789012:autoScalingGroup:87654321-1234-1234-1234-123456789012:autoScalingGroupName/asg-jobs</AutoScalingGroupARN>
+        <EnabledMetrics />
+        <AvailabilityZones>
+          <member>us-east-1b</member>
+          <member>us-east-1a</member>
+        </AvailabilityZones>
+        <Tags />
+        <LaunchTemplate>
+          <LaunchTemplateId>lt-1b30d076172g75bcd</LaunchTemplateId>
+          <LaunchTemplateName>JobsLaunchTemplate</LaunchTemplateName>
+          <Version>1</Version>
+        </LaunchTemplate>
+        <AutoScalingGroupName>asg-jobs</AutoScalingGroupName>
+        <HealthCheckGracePeriod>300</HealthCheckGracePeriod>
+        <NewInstancesProtectedFromScaleIn>false</NewInstancesProtectedFromScaleIn>
+        <SuspendedProcesses />
+        <CreatedTime>2015-05-06T17:47:15.107Z</CreatedTime>
+        <MinSize>2</MinSize>
+        <MaxSize>10</MaxSize>
+        <DesiredCapacity>2</DesiredCapacity>
+        <VPCZoneIdentifier>subnet-12345678,subnet-98765432</VPCZoneIdentifier>
+      </member>
+    </AutoScalingGroups>
+  </DescribeAutoScalingGroupsResult>
+  <ResponseMetadata>
+    <RequestId>7c6e177f-f082-11e1-ac58-3714bEXAMPLE</RequestId>
+  </ResponseMetadata>
+</DescribeAutoScalingGroupsResponse>
