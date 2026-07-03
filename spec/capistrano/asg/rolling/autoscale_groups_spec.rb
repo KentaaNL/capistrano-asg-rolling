@@ -115,9 +115,23 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroups do
       expect(groups.with_unique_images).to be_a(described_class)
     end
 
-    it 'deduplicates groups that share the same launch template image' do
-      # Both groups resolve to the same launch template and image via the stubs.
-      expect(groups.with_unique_images).to contain_exactly(group1)
+    context 'when all groups have unique images' do
+      before do
+        stub_request(:post, /amazonaws.com/)
+          .with(body: /Action=DescribeLaunchTemplateVersions/)
+          .to_return(body: File.read('spec/support/stubs/DescribeLaunchTemplateVersions.xml'))
+          .to_return(body: File.read('spec/support/stubs/DescribeLaunchTemplateVersions.AsgJobs.xml'))
+      end
+
+      it 'includes all groups' do
+        expect(groups.with_unique_images).to contain_exactly(group1, group2)
+      end
+    end
+
+    context 'when two groups share the same launch template image' do
+      it 'deduplicates groups that share the same launch template image' do
+        expect(groups.with_unique_images).to contain_exactly(group1)
+      end
     end
   end
 

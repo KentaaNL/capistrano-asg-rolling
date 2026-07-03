@@ -1,0 +1,21 @@
+<DescribeLaunchTemplateVersionsResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/">
+    <requestId>75dadfd2-c475-5465-9db9-5287dFXAMPLE</requestId>
+    <launchTemplateVersionSet>
+        <item>
+            <createTime>2017-10-31T11:38:52.000Z</createTime>
+            <createdBy>arn:aws:iam::123456789012:root</createdBy>
+            <defaultVersion>true</defaultVersion>
+            <launchTemplateData>
+                <imageId>ami-9d2cf3e7</imageId>
+                <instanceType>t2.micro</instanceType>
+                <securityGroupIdSet>
+                    <item>sg-e4076980</item>
+                </securityGroupIdSet>
+            </launchTemplateData>
+            <launchTemplateId>lt-1b30d076172g75bcd</launchTemplateId>
+            <launchTemplateName>JobsLaunchTemplate</launchTemplateName>
+            <versionDescription>FirstVersion</versionDescription>
+            <versionNumber>1</versionNumber>
+        </item>
+    </launchTemplateVersionSet>
+</DescribeLaunchTemplateVersionsResponse>
