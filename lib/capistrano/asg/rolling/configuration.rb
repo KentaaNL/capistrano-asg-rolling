@@ -70,8 +70,12 @@ module Capistrano
           fetch(:asg_rolling_keep_versions, fetch(:keep_releases))
         end
 
-        def verbose?
-          fetch(:asg_rolling_verbose)
+        def log_verbose?
+          fetch(:asg_rolling_log_verbose)
+        end
+
+        def log_timestamp?
+          fetch(:asg_rolling_log_timestamp)
         end
 
         def rolling_update=(value)

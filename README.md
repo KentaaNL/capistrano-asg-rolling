@@ -88,7 +88,7 @@ Verbose logging is enabled by default, set to false for less verbose logging:
 
 ```ruby
 # config/deploy.rb
-set :asg_rolling_verbose, false
+set :asg_rolling_log_verbose, false
 ```
 
 When launching an Instance, you can override any settings defined in the Launch Template with:

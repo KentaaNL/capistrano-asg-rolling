@@ -5,7 +5,8 @@ module Capistrano
     module Rolling
       # Logging support.
       class Logger
-        def initialize(verbose: false)
+        def initialize(timestamp: false, verbose: false)
+          @timestamp = timestamp
           @verbose = verbose
         end
 
@@ -28,6 +29,7 @@ module Capistrano
         private
 
         def format_text(text, color: nil)
+          text = "[#{current_time}] #{text}" if @timestamp
           text = colorize_text(text, color) if color
           text.gsub(/\*\*(.+?)\*\*/, bold_text('\\1'))
         end
@@ -42,6 +44,10 @@ module Capistrano
 
         def _color
           @_color ||= SSHKit::Color.new($stdout)
+        end
+
+        def current_time
+          Time.now.strftime('%H:%M:%S')
         end
       end
     end

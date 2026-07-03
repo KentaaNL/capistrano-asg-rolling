@@ -14,7 +14,8 @@ module Capistrano
         def set_defaults
           set_if_empty :asg_rolling_group_name, ENV.fetch('asg_name', nil)
           set_if_empty :asg_rolling_use_private_ip_address, true
-          set_if_empty :asg_rolling_verbose, true
+          set_if_empty :asg_rolling_log_verbose, true
+          set_if_empty :asg_rolling_log_timestamp, false
           set_if_empty :asg_rolling_update, true
         end
 
@@ -42,7 +43,7 @@ module Capistrano
         end
 
         def logger
-          @logger ||= Logger.new(verbose: config.verbose?)
+          @logger ||= Logger.new(timestamp: config.log_timestamp?, verbose: config.log_verbose?)
         end
 
         def config
