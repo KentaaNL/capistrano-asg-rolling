@@ -6,14 +6,16 @@ require 'aws-sdk-ec2'
 module Capistrano
   module ASG
     module Rolling
-      # AWS SDK.
+      # AWS SDK helpers. Clients are memoized per object and shared across objects on the same thread.
       module AWS
         def aws_autoscaling_client
-          @aws_autoscaling_client ||= ::Aws::AutoScaling::Client.new(aws_options)
+          @aws_autoscaling_client ||=
+            Thread.current[:aws_autoscaling_client] ||= ::Aws::AutoScaling::Client.new(aws_options)
         end
 
         def aws_ec2_client
-          @aws_ec2_client ||= ::Aws::EC2::Client.new(aws_options)
+          @aws_ec2_client ||=
+            Thread.current[:aws_ec2_client] ||= ::Aws::EC2::Client.new(aws_options)
         end
 
         private
