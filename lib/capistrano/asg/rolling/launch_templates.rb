@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'set'
-
 module Capistrano
   module ASG
     module Rolling
