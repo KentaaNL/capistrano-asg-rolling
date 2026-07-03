@@ -5,7 +5,7 @@ require 'time'
 module Capistrano
   module ASG
     module Rolling
-      # Test the SSHKit backend for availability.
+      # Polls an SSHKit backend until its SSH port is open and accepting connections.
       module SSH
         module_function
 

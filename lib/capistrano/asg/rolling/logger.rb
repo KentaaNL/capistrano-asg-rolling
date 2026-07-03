@@ -3,7 +3,7 @@
 module Capistrano
   module ASG
     module Rolling
-      # Logging support.
+      # Colorized stdout/stderr output with optional timestamps and **bold** formatting.
       class Logger
         def initialize(timestamp: false, verbose: false)
           @timestamp = timestamp
