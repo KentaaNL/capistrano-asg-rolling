@@ -13,7 +13,12 @@ module Capistrano
       class NoLaunchTemplate < Capistrano::ASG::Rolling::Exception
       end
 
+      # Exception when starting an instance refresh failed.
       class StartInstanceRefreshError < Capistrano::ASG::Rolling::Exception
+      end
+
+      # Exception when fetching the instance refresh status failed.
+      class InstanceRefreshStatusError < Capistrano::ASG::Rolling::Exception
       end
 
       # Exception when the instance refresh failed on one of the ASGs.

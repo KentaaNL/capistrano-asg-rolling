@@ -360,5 +360,20 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
         expect(instance_refresh).to be_nil
       end
     end
+
+    context 'when AWS returns an error' do
+      before do
+        stub_request(:post, /amazonaws.com/)
+          .with(body: /Action=DescribeInstanceRefreshes&AutoScalingGroupName=test-asg/)
+          .to_return(body: File.read('spec/support/stubs/DescribeInstanceRefreshes.Error.xml'), status: 400)
+      end
+
+      it 'raises an InstanceRefreshStatusError exception' do
+        expect { group.latest_instance_refresh }.to raise_error(Capistrano::ASG::Rolling::InstanceRefreshStatusError) do |error|
+          expect(error.cause).to be_a(Aws::AutoScaling::Errors::ValidationError)
+          expect(error.message).to eq('1 validation error detected.')
+        end
+      end
+    end
   end
 end

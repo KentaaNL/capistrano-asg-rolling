@@ -833,14 +833,14 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
       end
     end
 
-    context 'when a ServiceError is raised during polling' do
-      let(:service_error) { Aws::AutoScaling::Errors::ServiceError.new(nil, 'Throttled') }
+    context 'when an InstanceRefreshStatusError is raised during polling' do
+      let(:status_error) { Capistrano::ASG::Rolling::InstanceRefreshStatusError.new('Throttled') }
 
       before do
         call_count = 0
         allow(group).to receive(:latest_instance_refresh) do
           call_count += 1
-          raise service_error if call_count == 1
+          raise status_error if call_count == 1
 
           completed_status
         end

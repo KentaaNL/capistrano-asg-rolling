@@ -100,6 +100,10 @@ module Capistrano
           return nil if status.nil?
 
           InstanceRefreshStatus.new(status, percentage_complete)
+        rescue Aws::AutoScaling::Errors::ServiceError => e
+          # Wrap AWS service errors (typically throttling that exceeded the SDK's
+          # retry budget) so callers can rescue a gem-defined error type.
+          raise Capistrano::ASG::Rolling::InstanceRefreshStatusError, e
         end
 
         # Returns instances with lifecycle state "InService" for this Auto Scaling Group.
