@@ -125,6 +125,7 @@ RSpec.describe Capistrano::ASG::Rolling::Instance do
 
       it 'raises an InstanceTerminateFailed exception' do
         expect { instance.terminate }.to raise_error(Capistrano::ASG::Rolling::InstanceTerminateFailed) do |error|
+          expect(error.cause).to be_a(Aws::EC2::Errors::InvalidInstanceIDNotFound)
           expect(error.instance).to eq(instance)
           expect(error.message).to eq("The instance ID 'i-1a2b3c4d' does not exist")
         end

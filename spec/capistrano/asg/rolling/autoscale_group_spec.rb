@@ -159,7 +159,10 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
       end
 
       it 'raises an StartInstanceRefreshError exception' do
-        expect { group.start_instance_refresh(template) }.to raise_error(Capistrano::ASG::Rolling::StartInstanceRefreshError, 'An Instance Refresh is already in progress and blocks the execution of this Instance Refresh.')
+        expect { group.start_instance_refresh(template) }.to raise_error(Capistrano::ASG::Rolling::StartInstanceRefreshError) do |error|
+          expect(error.cause).to be_a(Aws::AutoScaling::Errors::InstanceRefreshInProgress)
+          expect(error.message).to eq('An Instance Refresh is already in progress and blocks the execution of this Instance Refresh.')
+        end
       end
     end
 
@@ -170,7 +173,10 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
       end
 
       it 'raises a StartInstanceRefreshError exception' do
-        expect { group.start_instance_refresh(template) }.to raise_error(Capistrano::ASG::Rolling::StartInstanceRefreshError, "The AMI 'ami-12345' is pending.")
+        expect { group.start_instance_refresh(template) }.to raise_error(Capistrano::ASG::Rolling::StartInstanceRefreshError) do |error|
+          expect(error.cause).to be_a(Aws::AutoScaling::Errors::ValidationError)
+          expect(error.message).to eq("The AMI 'ami-12345' is pending.")
+        end
       end
     end
 
