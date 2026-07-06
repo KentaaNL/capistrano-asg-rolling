@@ -278,9 +278,9 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
         allow(autoscale_groups).to receive(:with_launch_template).with(launch_template).and_return(groups_with_lt)
 
         allow(asgs_launch_templates).to receive(:update).and_return(updated_templates)
-        allow(updated_templates).to receive(:each).and_yield(launch_template)
+        allow(updated_templates).to receive(:flat_map) { |&block| [launch_template].flat_map(&block) }
 
-        allow(groups_with_lt).to receive(:each).and_yield(group)
+        allow(groups_with_lt).to receive(:map) { |&block| [group].map(&block) }
         allow(group).to receive(:start_instance_refresh)
 
         allow(config_launch_templates).to receive(:merge)
@@ -323,9 +323,9 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
 
         allow(autoscale_groups).to receive_messages(launch_templates: asgs_launch_templates, with_launch_template: groups_with_lt)
         allow(asgs_launch_templates).to receive(:update).and_return(updated_templates)
-        allow(updated_templates).to receive(:each).and_yield(launch_template)
+        allow(updated_templates).to receive(:flat_map) { |&block| [launch_template].flat_map(&block) }
 
-        allow(groups_with_lt).to receive(:each).and_yield(group)
+        allow(groups_with_lt).to receive(:map) { |&block| [group].map(&block) }
         allow(group).to receive(:start_instance_refresh)
           .and_raise(Capistrano::ASG::Rolling::StartInstanceRefreshError, 'already in progress')
 
