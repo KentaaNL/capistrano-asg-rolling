@@ -6,15 +6,15 @@
 
 Capistrano plugin for performing rolling updates to AWS Auto Scaling Groups using the [instance refresh feature](https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-instance-refresh.html).
 
-Instead of deploying to live servers, capistrano-asg-rolling will create a temporary instance for deployment and then trigger an instance refresh to perform a rolling update of the Auto Scaling Group(s). In more detail, during deployment it will:
+Instead of deploying to live servers, capistrano-asg-rolling will create temporary instances for deployment and then trigger an instance refresh to perform a rolling update of the Auto Scaling Group(s). In more detail, during deployment it will:
 
-- Launch an instance from the AMI defined in the Launch Template of the Auto Scaling Group(s).
+- Launch an instance for each Auto Scaling Group, from the AMI defined in its Launch Template.
 - Deploy your application to the launched instances.
 - After deployment, stop the instances and create an AMI for each instance.
 - Create new Launch Template versions for the new AMIs.
 - Trigger Instance Refresh on the Auto Scaling Group(s) to perform a rolling update.
 - Delete any outdated Launch Template versions, AMIs and snapshots created by previous deployments.
-- Terminate the no longer needed instances.
+- Terminate the temporary instances.
 
 ## Important
 
@@ -25,13 +25,13 @@ https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-overview.
 
 ### Launch Templates
 
-This gem depends on Auto Scaling Groups with Launch Templates. Using an Auto Scaling Group with a Launch Configuration is not supported, and will raise an `Capistrano::ASG::Rolling::NoLaunchTemplate`.
+This gem depends on Auto Scaling Groups with Launch Templates. Using an Auto Scaling Group with a Launch Configuration is not supported, and will raise a `Capistrano::ASG::Rolling::NoLaunchTemplate` error.
 
-Instance refresh uses the desired configuration to update the Launch Template version of the Auto Scaling Group after a succesful deployment. Setting the Launch Template version to `Latest` on the Auto Scaling Group is not needed.
+Instance refresh uses the desired configuration to update the Launch Template version of the Auto Scaling Group after a successful deployment. Setting the Launch Template version to `Latest` on the Auto Scaling Group is not needed.
 
 ### Experimental
 
-Please note that this gem works well for our configuration / use case, but it might not fit yours. Any feedback using GitHub issues / pull requests, is much appreciated.
+Please note that this gem works well for our configuration / use case, but it might not fit yours. Any feedback via GitHub issues / pull requests is much appreciated.
 
 ## Installation
 
@@ -165,7 +165,7 @@ Now start a deployment with `cap <stage> deploy` and enjoy.
 
 There might be cases where you just want to deploy your code to the servers in the Auto Scaling Group(s) without a rolling update.
 
-You can configure rolling updates per autoscaling group by using the `rolling` option:
+You can configure rolling updates per Auto Scaling Group by using the `rolling` option:
 
 ```ruby
 # config/deploy/<stage>.rb
@@ -173,28 +173,28 @@ autoscale 'app-autoscale-group', rolling: true    # default: use rolling deploym
 autoscale 'web-autoscale-group', rolling: false   # override: use normal deployment
 ```
 
-### Deploy with custom percentage of minimum/maximum healthy instances during the instance refresh
+### Deploy with custom minimum/maximum healthy percentages
 
 The instance refresh is triggered without specifying a value for the minimum / maximum healthy percentages. This means that either the default
 values will be used (minimum: 90%, maximum: 100%) or the percentages set in the instance maintenance policy for the Auto Scaling Group.
-You can tune both the minimum and maximum values to have more control about the desired capacity that must be healthy to proceed with replacing instances.
+You can tune both the minimum and maximum values to have more control over the desired capacity that must be healthy to proceed with replacing instances.
 
-For example: reducing the minimum healthy percentage allows more instances to be terminated and new instances to be brought up at once during the instance refresh. eg. a value of 0 would terminate all instances in the autoscaling group and replace them at once.
+For example, reducing the minimum healthy percentage allows more instances to be terminated and replaced at once during the instance refresh; a value of 0 would terminate and replace all instances in the Auto Scaling Group at once.
 
-You can configure the minimum healthy percentage per autoscaling group using the `min_healthy_percentage` option, and the maximum healthy percentage using the `max_healthy_percentage` option. Please note that if you specify `max_healthy_percentage`, you must also specify `min_healthy_percentage`.
+You can configure the minimum healthy percentage per Auto Scaling Group using the `min_healthy_percentage` option, and the maximum healthy percentage using the `max_healthy_percentage` option. Please note that if you specify `max_healthy_percentage`, you must also specify `min_healthy_percentage`.
 
 ```ruby
 # config/deploy/<stage>.rb
-autoscale 'app-autoscale-group',                                                           # use default percentages or percentages set in the instance maintenance policy
+autoscale 'app-autoscale-group'                                                            # use default percentages or percentages set in the instance maintenance policy
 autoscale 'web-autoscale-group', min_healthy_percentage: 75                                # allow 25% of instances to be terminated and replaced at once
 autoscale 'web-autoscale-group', min_healthy_percentage: 100, max_healthy_percentage: 110  # allow for 10% above desired capacity during instance refresh
 ```
 
 ### Custom stage
 
-The rolling configuration of the stage has a side-effect: any Capistrano tasks you run, will also launch instances per Auto Scaling Group.
+The rolling configuration of the stage has a side-effect: any Capistrano task you run will also launch instances per Auto Scaling Group.
 
-For example the command: `cap production rails:console`, will launch a new instance and run `rails:console` on that instance. While that can be useful, you often just want to run the task on the primary server. A solution is to create two stages with different rolling configurations, for example:
+For example, the command `cap production rails:console` will launch a new instance and run `rails:console` on that instance. While that can be useful, you often just want to run the task on the primary server. A solution is to create two stages with different rolling configurations, for example:
 
 ```ruby
 # config/deploy/production.rb
@@ -219,7 +219,7 @@ With these two stages, you can run any tasks with `cap production <task name>` a
 
 ### Tags
 
-During deployment, the following tags will be added to the AMI and snapshot containing information about the current application, stage and deployment:
+During deployment, the following tags will be added to the AMI and snapshot, containing information about the current application, stage and deployment:
 - `capistrano-asg-rolling:application`
 - `capistrano-asg-rolling:stage`
 - `capistrano-asg-rolling:deployment-branch`
@@ -228,7 +228,7 @@ During deployment, the following tags will be added to the AMI and snapshot cont
 - `capistrano-asg-rolling:deployment-user`
 
 In addition to that, the tag `capistrano-asg-rolling:gem-version` will be added with the value of the current gem version.
-This tag is also used to determine if the AMI was created by this gem, and can be deleted automatically.
+This tag is also used to determine whether the AMI was created by this gem and can therefore be deleted automatically.
 
 You can add custom tag(s) to the AMI and snapshot by setting the property `asg_rolling_ami_tags`, for example:
 
@@ -241,7 +241,7 @@ set :asg_rolling_ami_tags, { 'Application' => 'My Application', 'Environment' =>
 
 ### Test deployment
 
-Do a test deployment: run the deploy task, but do not trigger the update ASG task and do not automatically terminate instances.
+Do a test deployment: run the deploy task, but do not trigger an instance refresh and do not automatically terminate the launched instances.
 
 ```bash
 cap <stage> rolling:deploy_test
@@ -249,8 +249,8 @@ cap <stage> rolling:deploy_test
 
 ### Launch instances
 
-Just launch instance(s) defined in the Auto Scale Group(s) launch template.
-This instance is not attached to the Auto Scale Group and needs to be terminated manually.
+Launch instance(s) from the Launch Template of the Auto Scaling Group(s).
+These instances are not attached to the Auto Scaling Group and need to be terminated manually.
 
 ```bash
 cap <stage> rolling:launch_instances
@@ -258,8 +258,8 @@ cap <stage> rolling:launch_instances
 
 ### Create AMI of instance in ASG
 
-Pick an instance in the Auto Scale Group(s), put it into standby and stop it.
-Then create an AMI and a new launch template. Then start the instance and put it into service again.
+Pick an instance in the Auto Scaling Group(s), put it into standby and stop it.
+Then create an AMI, start the instance and put it back into service, and create a new Launch Template version with the new AMI.
 
 ```bash
 cap <stage> rolling:create_ami
@@ -267,7 +267,7 @@ cap <stage> rolling:create_ami
 
 ## Filtering
 
-You can filter any command to run on a specific Auto Scale Group by using the parameter `asg_name`.
+You can filter any command to run on a specific Auto Scaling Group by using the parameter `asg_name`.
 
 For example, the command:
 
@@ -275,7 +275,7 @@ For example, the command:
 cap <stage> deploy asg_name=app-autoscale-group
 ```
 
-Will do a deployment only on the Auto Scale Group with the name `app-autoscale-group`.
+This will do a deployment only on the Auto Scaling Group named `app-autoscale-group`.
 
 ## IAM policy
 
