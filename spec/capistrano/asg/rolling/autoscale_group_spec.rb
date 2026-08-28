@@ -35,13 +35,13 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
   it { expect(described_class::COMPLETED_REFRESH_STATUSES).to eq %w[Successful Failed Cancelled RollbackSuccessful RollbackFailed] }
 
   describe '#exists?' do
-    context 'when auto scale group exists' do
+    context 'when auto scaling group exists' do
       it 'returns true' do
         expect(group.exists?).to be true
       end
     end
 
-    context 'when auto scale group does not exist' do
+    context 'when auto scaling group does not exist' do
       before do
         stub_request(:post, /amazonaws.com/)
           .with(body: /Action=DescribeAutoScalingGroups/).to_return(body: File.read('spec/support/stubs/DescribeAutoScalingGroups.Empty.xml'))
@@ -141,7 +141,7 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
         .with(body: /Action=StartInstanceRefresh&AutoScalingGroupName=test-asg/).to_return(body: File.read('spec/support/stubs/StartInstanceRefresh.xml'))
     end
 
-    it 'calls the API to start instance refresh for the given auto scale group' do
+    it 'calls the API to start instance refresh for the given auto scaling group' do
       group.start_instance_refresh(template)
       expect(WebMock).to have_requested(:post, /amazonaws.com/)
         .with(body: /Action=StartInstanceRefresh&AutoScalingGroupName=test-asg/).once
