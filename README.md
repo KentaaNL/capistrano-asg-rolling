@@ -59,58 +59,18 @@ install_plugin Capistrano::ASG::Rolling::Plugin
 
 ## Configuration
 
-Below are the Capistrano configuration options:
+Below you can find all configurable settings for this gem.
 
-Setup AWS credentials:
+### AWS
+
+Set up the AWS credentials and region:
 
 ```ruby
 # config/deploy.rb
 set :aws_access_key_id,     ENV['AWS_ACCESS_KEY_ID']
 set :aws_secret_access_key, ENV['AWS_SECRET_ACCESS_KEY']
+set :aws_session_token,     ENV['AWS_SESSION_TOKEN']
 set :aws_region,            ENV['AWS_REGION']
-```
-
-After deployment, any outdated Launch Template versions, AMIs and snapshots will be deleted. By default, the number of `keep_releases` will be kept. Change this with:
-
-```ruby
-# config/deploy.rb
-set :asg_rolling_keep_versions, 10
-```
-
-Servers are added using their private IP address by default. Set to false to use the public IP address instead:
-
-```ruby
-# config/deploy.rb
-set :asg_rolling_use_private_ip_address, false
-```
-
-Verbose logging is enabled by default, set to false for less verbose logging:
-
-```ruby
-# config/deploy.rb
-set :asg_rolling_log_verbose, false
-```
-
-When launching an Instance, you can override any settings defined in the Launch Template with:
-
-```ruby
-# config/deploy.rb
-set :asg_rolling_instance_overrides, { instance_type: 'c5.large' }
-```
-
-You can make Capistrano wait until the instances in the autoscaling group have completed refreshing with:
-
-```ruby
-# config/deploy.rb
-set :asg_wait_for_instance_refresh, true
-set :asg_instance_refresh_polling_interval, 30 # default
-```
-
-Enable or disable auto-rollback on instance refreshes (default: false):
-
-```ruby
-# config/deploy.rb
-set :asg_instance_refresh_auto_rollback, true
 ```
 
 The AWS clients are configured with `adaptive` retry mode and a retry limit of 10 by default, so transient throttling (`Aws::AutoScaling::Errors::Throttling: Rate exceeded`) does not abort a deployment. You can tune both:
@@ -121,12 +81,72 @@ set :asg_aws_retry_mode, 'adaptive' # default; one of 'legacy', 'standard', 'ada
 set :asg_aws_retry_limit, 10        # default
 ```
 
+### Launched instances
+
+Launched instances are added to Capistrano as servers using their private IP address by default. Set this option to false to use the public IP address instead:
+
+```ruby
+# config/deploy.rb
+set :asg_rolling_use_private_ip_address, false
+```
+
+When launching an instance, you can override any settings defined in the Launch Template with:
+
+```ruby
+# config/deploy.rb
+set :asg_rolling_instance_overrides, { instance_type: 'c5.large' }
+```
+
+### AMI
+
 After creating an AMI, the gem waits until it becomes available before triggering an instance refresh. The defaults match the AWS SDK defaults (~10 minutes), but for larger root volumes (e.g. resizing 24 GB → 32 GB) the AMI can take longer to become available. Override the waiter via:
 
 ```ruby
 # config/deploy.rb
 set :asg_ami_wait_delay, 15         # seconds between polls (default: 15)
 set :asg_ami_wait_max_attempts, 40  # max polls (default: 40, ≈ 10 minutes)
+```
+
+### Instance refresh
+
+You can make Capistrano wait until the instance refresh on the Auto Scaling Group(s) has completed:
+
+```ruby
+# config/deploy.rb
+set :asg_wait_for_instance_refresh, true
+set :asg_instance_refresh_polling_interval, 30 # seconds (default: 30)
+```
+
+Enable auto-rollback to have the Auto Scaling Group roll back to its previous configuration when the instance refresh fails (default: false):
+
+```ruby
+# config/deploy.rb
+set :asg_instance_refresh_auto_rollback, true
+```
+
+### Cleanup
+
+After deployment, any outdated Launch Template versions, AMIs and snapshots will be deleted. By default, the same number of versions as Capistrano's `keep_releases` will be kept. Change this with:
+
+```ruby
+# config/deploy.rb
+set :asg_rolling_keep_versions, 10
+```
+
+### Logging
+
+Verbose logging is enabled by default; set this option to false for less verbose logging:
+
+```ruby
+# config/deploy.rb
+set :asg_rolling_log_verbose, false
+```
+
+By default, the log output does not contain any timestamps; set the option below to true to enable timestamps:
+
+```ruby
+# config/deploy.rb
+set :asg_rolling_log_timestamp, true
 ```
 
 ## Usage
