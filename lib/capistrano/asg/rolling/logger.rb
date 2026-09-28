@@ -11,15 +11,15 @@ module Capistrano
         end
 
         def info(text)
-          $stdout.puts format_text(text)
+          write($stdout, format_text(text))
         end
 
         def warning(text)
-          $stdout.puts format_text("WARNING: #{text}")
+          write($stdout, format_text("WARNING: #{text}"))
         end
 
         def error(text)
-          $stderr.puts format_text(text, color: :red) # rubocop:disable Style/StderrPuts
+          write($stderr, format_text(text, color: :red))
         end
 
         def verbose(text)
@@ -27,6 +27,15 @@ module Capistrano
         end
 
         private
+
+        # Cleanup logs as it goes, often from the at_exit hook after Capistrano was
+        # interrupted, when whatever read its output may already have gone. A broken
+        # pipe must not stop it before it terminates the instances it launched.
+        def write(io, text)
+          io.puts text
+        rescue Errno::EPIPE, IOError
+          nil
+        end
 
         def format_text(text, color: nil)
           text = "[#{current_time}] #{text}" if @timestamp
