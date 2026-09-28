@@ -44,6 +44,26 @@ RSpec.describe Capistrano::ASG::Rolling::Logger do
     end
   end
 
+  context 'when nothing reads the output any more' do
+    it 'carries on when stdout is a broken pipe' do
+      allow($stdout).to receive(:puts).and_raise(Errno::EPIPE)
+
+      expect { logger.info('Terminating instance(s)...') }.not_to raise_error
+    end
+
+    it 'carries on when stderr is a broken pipe' do
+      allow($stderr).to receive(:puts).and_raise(Errno::EPIPE)
+
+      expect { logger.error('Failed to terminate') }.not_to raise_error
+    end
+
+    it 'carries on when stdout has been closed' do
+      allow($stdout).to receive(:puts).and_raise(IOError, 'closed stream')
+
+      expect { logger.info('Terminating instance(s)...') }.not_to raise_error
+    end
+  end
+
   describe '#verbose' do
     context 'when verbose is disabled' do
       it 'does nothing' do
