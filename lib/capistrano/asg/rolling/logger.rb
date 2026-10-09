@@ -28,12 +28,10 @@ module Capistrano
 
         private
 
-        # Cleanup logs as it goes, often from the at_exit hook after Capistrano was
-        # interrupted, when whatever read its output may already have gone. A broken
-        # pipe must not stop it before it terminates the instances it launched.
+        # Output may be gone (e.g. when called from at_exit); never let logging raise.
         def write(io, text)
           io.puts text
-        rescue Errno::EPIPE, IOError
+        rescue Errno::EPIPE, Errno::EIO, IOError
           nil
         end
 

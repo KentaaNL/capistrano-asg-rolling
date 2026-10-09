@@ -57,6 +57,12 @@ RSpec.describe Capistrano::ASG::Rolling::Logger do
       expect { logger.error('Failed to terminate') }.not_to raise_error
     end
 
+    it 'carries on when the terminal has gone away' do
+      allow($stdout).to receive(:puts).and_raise(Errno::EIO)
+
+      expect { logger.info('Terminating instance(s)...') }.not_to raise_error
+    end
+
     it 'carries on when stdout has been closed' do
       allow($stdout).to receive(:puts).and_raise(IOError, 'closed stream')
 
