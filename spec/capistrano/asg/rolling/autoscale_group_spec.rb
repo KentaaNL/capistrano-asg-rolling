@@ -33,6 +33,7 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
   end
 
   it { expect(described_class::COMPLETED_REFRESH_STATUSES).to eq %w[Successful Failed Cancelled RollbackSuccessful RollbackFailed] }
+  it { expect(described_class::FAILED_REFRESH_STATUSES).to eq %w[Failed RollbackSuccessful RollbackFailed] }
 
   describe '#exists?' do
     context 'when auto scaling group exists' do
@@ -349,6 +350,36 @@ RSpec.describe Capistrano::ASG::Rolling::AutoscaleGroup do
         instance_refresh = group.latest_instance_refresh
         expect(instance_refresh.status).to eq('Failed')
         expect(instance_refresh.percentage_complete).to eq(50)
+        expect(instance_refresh.completed?).to be true
+        expect(instance_refresh.failed?).to be true
+      end
+    end
+
+    context 'with a refresh that ended RollbackSuccessful' do
+      before do
+        stub_request(:post, /amazonaws.com/)
+          .with(body: /Action=DescribeInstanceRefreshes&AutoScalingGroupName=test-asg/)
+          .to_return(body: File.read('spec/support/stubs/DescribeInstanceRefreshes.RollbackSuccessful.xml'))
+      end
+
+      it 'is completed and failed' do
+        instance_refresh = group.latest_instance_refresh
+        expect(instance_refresh.status).to eq('RollbackSuccessful')
+        expect(instance_refresh.completed?).to be true
+        expect(instance_refresh.failed?).to be true
+      end
+    end
+
+    context 'with a refresh that ended RollbackFailed' do
+      before do
+        stub_request(:post, /amazonaws.com/)
+          .with(body: /Action=DescribeInstanceRefreshes&AutoScalingGroupName=test-asg/)
+          .to_return(body: File.read('spec/support/stubs/DescribeInstanceRefreshes.RollbackFailed.xml'))
+      end
+
+      it 'is completed and failed' do
+        instance_refresh = group.latest_instance_refresh
+        expect(instance_refresh.status).to eq('RollbackFailed')
         expect(instance_refresh.completed?).to be true
         expect(instance_refresh.failed?).to be true
       end
