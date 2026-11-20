@@ -833,6 +833,26 @@ RSpec.describe 'rolling rake tasks' do # rubocop:disable RSpec/DescribeClass
       end
     end
 
+    context 'when refresh rolls back' do
+      let(:rollback_in_progress_status) do
+        Capistrano::ASG::Rolling::AutoscaleGroup::InstanceRefreshStatus.new('RollbackInProgress', 25)
+      end
+      let(:rolled_back_status) do
+        Capistrano::ASG::Rolling::AutoscaleGroup::InstanceRefreshStatus.new('RollbackSuccessful', 0)
+      end
+
+      before do
+        allow(group).to receive(:latest_instance_refresh)
+          .and_return(in_progress_status, rollback_in_progress_status, rolled_back_status)
+      end
+
+      it 'keeps polling until the rollback completes, then raises InstanceRefreshFailed' do
+        expect { run_task('rolling:instance_refresh_status') }
+          .to raise_error(Capistrano::ASG::Rolling::InstanceRefreshFailed)
+        expect(plugin).to have_received(:sleep).twice
+      end
+    end
+
     context 'when an InstanceRefreshStatusError is raised during polling' do
       let(:status_error) { Capistrano::ASG::Rolling::InstanceRefreshStatusError.new('Throttled') }
 

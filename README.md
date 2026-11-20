@@ -124,6 +124,8 @@ Enable auto-rollback to have the Auto Scaling Group roll back to its previous co
 set :asg_instance_refresh_auto_rollback, true
 ```
 
+When Capistrano waits for the instance refresh, a refresh that ends `Failed`, `RollbackSuccessful` or `RollbackFailed` fails the deployment.
+
 ### Cleanup
 
 After deployment, any outdated Launch Template versions, AMIs and snapshots will be deleted. By default, the same number of versions as Capistrano's `keep_releases` will be kept. Change this with:

@@ -13,7 +13,7 @@ module Capistrano
         LIFECYCLE_STATE_STANDBY = 'Standby'
 
         COMPLETED_REFRESH_STATUSES = %w[Successful Failed Cancelled RollbackSuccessful RollbackFailed].freeze
-        FAILED_REFRESH_STATUS = 'Failed'
+        FAILED_REFRESH_STATUSES = %w[Failed RollbackSuccessful RollbackFailed].freeze
 
         attr_reader :name, :properties, :refresh_id
 
@@ -89,7 +89,7 @@ module Capistrano
           end
 
           def failed?
-            status == FAILED_REFRESH_STATUS
+            FAILED_REFRESH_STATUSES.include?(status)
           end
         end
 
